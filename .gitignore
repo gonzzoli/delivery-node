@@ -1,0 +1,6 @@
+build/
+# Logs
+logs
+
+# Dependency directories
+node_modules/
