@@ -1,11 +1,11 @@
+import { EntidadId } from "../../utils/entidadId";
 import { Etiquetado } from "../../utils/Etiquetado";
 
 // Definición de Ids
-type EntidadId = Etiquetado<string, "EntidadId">;
 type OrdenId = Etiquetado<EntidadId, "OrdenId">;
 type UsuarioId = Etiquetado<EntidadId, "UsuarioId">;
 type ArticuloId = Etiquetado<EntidadId, "ArticuloId">;
-type CarritoId = Etiquetado<EntidadId, "CarritoId">;
+export type CarritoId = Etiquetado<EntidadId, "CarritoId">;
 
 // Defino estos tipos porque el orden dentro del arreglo es importante
 type Latitud = Etiquetado<number, "Latitud">;

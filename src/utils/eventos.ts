@@ -1,9 +1,6 @@
-import { Etiquetado } from "../../utils/TaggedType";
 import uuid from "uuid";
-import { FechaHora, FechaHoraAlta, FechaHoraBaja, EntidadId } from "../tipos";
-
-// Esto mas que nada utilitario para usarlo como sea segun lo que representa el evento
-export type FechaHoraEvento = FechaHora & FechaHoraAlta & FechaHoraBaja;
+import { EntidadId } from "./entidadId";
+import { Etiquetado } from "./Etiquetado";
 
 /**
  * Forma que deben tener los eventos de los distintos agregados de la aplicacion.
@@ -18,7 +15,7 @@ export type EventoAplicacion<
   id: Etiquetado<string, "EventoAplicacionId">;
   agregadoId: AgregadoId;
   agregadoTipo: AgregadoTipo;
-  fyhEvento: FechaHoraEvento;
+  fyhEvento: Date;
   secuenciaEvento: number;
   nombreEvento: NombreEvento;
   contenido: Contenido;
@@ -30,16 +27,15 @@ export type CualquierEventoAplicacion = EventoAplicacion<
   Record<string, unknown> | null
 >;
 
-export const generarIdEvento = () =>
-  uuid.v7() as CualquierEventoAplicacion["id"];
+export const generarIdEvento = () => uuid.v7() as CualquierEventoAplicacion["id"];
 
 /**
  * Tipo a aplicar en los manejadores de eventos de cada agregado.
  */
-export type ManejadorEvento<
-  Agregado,
-  Evento extends CualquierEventoAplicacion,
-> = (estadoActual: Agregado | undefined, evento: Evento) => Agregado;
+export type ManejadorEvento<Agregado, Evento extends CualquierEventoAplicacion> = (
+  estadoActual: Agregado | undefined,
+  evento: Evento
+) => Agregado;
 
 export const evolucionarAgregado =
   <Agregado, EventosPosibles extends CualquierEventoAplicacion>(
@@ -58,15 +54,11 @@ export const evolucionarAgregado =
     return estadoActual;
   };
 
-const registrarEvento = <Evento extends CualquierEventoAplicacion>(
-  evento: Evento
-) => {
+const registrarEvento = <Evento extends CualquierEventoAplicacion>(evento: Evento) => {
   // insertar en mongo
 };
 
-const buscarEventosDeAgregado = <
-  EventosAgregado extends CualquierEventoAplicacion,
->(
+const buscarEventosDeAgregado = <EventosAgregado extends CualquierEventoAplicacion>(
   agregadoId: string
 ) => {
   // buscar en mongo
