@@ -6,6 +6,7 @@ export enum CodigosError {
   AUTORIZACION,
   VALIDACION_DTO,
   CONEXION_BD,
+  CONEXION_RABBIT,
   PREPARAR_DATOS_BD,
   QUERY_BD,
   RECURSO_YA_EXISTENTE,
@@ -48,6 +49,22 @@ export class ErrorConexionBD extends ErrorAplicacion {
     );
     Object.setPrototypeOf(this, ErrorConexionBD.prototype);
     this.name = "ErrorConexionBD";
+  }
+}
+
+/**
+ * Cuando falla la conexion con Rabbit
+ */
+export class ErrorConexionRabbit extends ErrorAplicacion {
+  constructor(error?: string) {
+    super(
+      "Error en conexion a RabbitMQ",
+      CodigosHTTP.FORBIDDEN,
+      error ?? "Ocurrió un error al conectar a RabbitMQ",
+      CodigosError.CONEXION_RABBIT
+    );
+    Object.setPrototypeOf(this, ErrorConexionRabbit.prototype);
+    this.name = "ErrorConexionRabbit";
   }
 }
 

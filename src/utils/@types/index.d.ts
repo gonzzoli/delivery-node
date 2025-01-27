@@ -22,6 +22,7 @@ declare global {
       PUERTO_SERVIDOR: number;
       MONGO_CONN_STRING: string;
       MONGO_DB_NAME: string;
+      RABBIT_URL: string;
     }
   }
 }
