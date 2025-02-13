@@ -1,17 +1,7 @@
-/* En un servicio vamos a hacer muchas cosas, de las cuales la mayoria puede lanzar un error.
-Lo importante es que creemos errores significativos y que distingan especificamente el tipo de error,
-para que luego desde este manejador podamos devolver un error coherente al usuario y registrar el error
-para nuestros propios propositos de analisis.
-*/
-
 import { NextFunction, Response, Request } from "express";
 import { logger } from "../utils/logger";
-import { ErrorAplicacion, ErrorValidacionDTO } from "../utils/errores/clasesErrores";
 import { CodigosHTTP } from "../utils/codigosHTTP";
-
-// type ErrorServicio = {
-//     codigoError:
-// }
+import { ErrorAplicacion, ErrorValidacionDTO } from "../errores/clasesErrores";
 
 /**
  * Manejador que se va a utilizar en los servicios para mapear el error
@@ -19,7 +9,6 @@ import { CodigosHTTP } from "../utils/codigosHTTP";
  * @param error Lo que atrapa el catch. De tipo unknown porque el catch basicamente agarra cualquier cosa a la que se le haga throw,
  * incluso si no es un error. En la funcion se va filtrando segun el tipo del parametro error.
  */
-
 export const manejadorErrores = (
   error: unknown,
   req: Request,

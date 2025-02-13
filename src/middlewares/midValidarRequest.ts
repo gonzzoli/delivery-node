@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { NextFunction, Request, Response } from "express";
 import { AnyZodObject, ZodError } from "zod";
-import { ErrorValidacionDTO } from "../utils/errores/clasesErrores";
+import { ErrorValidacionDTO } from "../errores/clasesErrores";
 
 /**
  *

@@ -1,12 +1,13 @@
 import express from "express";
-import { conectarBD } from "./lib/bd";
+import { conectarBD, desconectarBD } from "./config/bd";
 import cookieParser from "cookie-parser";
 import swaggerUi from "swagger-ui-express";
-import * as swagger from "./lib/docs";
+import * as swagger from "./config/docs";
 import routerBase from "./rest";
 import { logger } from "./utils/logger";
 import { manejadorErrores } from "./middlewares/manejadorErrores";
 import { config } from "dotenv";
+import { Server } from "http";
 config();
 
 process.on("uncaughtException", (error) => {
@@ -37,29 +38,36 @@ app.use("/api", routerBase);
 app.use(manejadorErrores);
 
 const PUERTO_SERVIDOR = process.env.PUERTO_SERVIDOR;
-const servidor = app.listen(PUERTO_SERVIDOR ?? 3000, async () => {
+let servidor: Server;
+
+void (async () => {
   try {
     await conectarBD();
+    servidor = app.listen(PUERTO_SERVIDOR);
     logger.info("Base de datos conectada y servidor iniciado en puerto " + PUERTO_SERVIDOR);
   } catch (error: unknown) {
-    console.log(
+    logger.error(
+      error,
       "No pudo conectarse a la base de datos. 5 intentos fallidos, debera revisarse manualmente el problema."
     );
   }
-});
-
+})();
 
 function apagarServidor() {
-  console.log("Apagando servidor...");
-  servidor.close(() => {
-    console.log("Servidor apagado");
-    process.exit(0);
-  });
-
-  servidor.closeAllConnections();
+  logger.info("Apagando servidor...");
+  desconectarBD()
+    .then(() => logger.info("Base de datos desconectada"))
+    .then(() => {
+      servidor.closeAllConnections();
+      servidor.close(() => {
+        logger.info("Servidor apagado");
+        process.exit(0);
+      });
+    })
+    .catch((err) => logger.error(err, "Oucrrio un error al apagar el servidor"));
 
   setTimeout(() => {
-    console.log("No se ha podido apagar el servidor en 5 segundos. Apagando forzosamente");
+    logger.info("No se ha podido apagar el servidor en 5 segundos. Apagando forzosamente");
     process.exit(1);
   }, 5000);
 }
