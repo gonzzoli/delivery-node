@@ -9,6 +9,14 @@ import { manejadorErrores } from "./middlewares/manejadorErrores";
 import { config } from "dotenv";
 config();
 
+process.on("uncaughtException", (error) => {
+  logger.fatal(error, "Error no capturado");
+  apagarServidor();
+});
+process.on("SIGINT", apagarServidor);
+process.on("SIGTERM", apagarServidor);
+process.on("SIGKILL", apagarServidor);
+
 const app = express();
 
 app.use(express.json());
@@ -29,7 +37,7 @@ app.use("/api", routerBase);
 app.use(manejadorErrores);
 
 const PUERTO_SERVIDOR = process.env.PUERTO_SERVIDOR;
-app.listen(PUERTO_SERVIDOR ?? 3000, async () => {
+const servidor = app.listen(PUERTO_SERVIDOR ?? 3000, async () => {
   try {
     await conectarBD();
     logger.info("Base de datos conectada y servidor iniciado en puerto " + PUERTO_SERVIDOR);
@@ -39,3 +47,19 @@ app.listen(PUERTO_SERVIDOR ?? 3000, async () => {
     );
   }
 });
+
+
+function apagarServidor() {
+  console.log("Apagando servidor...");
+  servidor.close(() => {
+    console.log("Servidor apagado");
+    process.exit(0);
+  });
+
+  servidor.closeAllConnections();
+
+  setTimeout(() => {
+    console.log("No se ha podido apagar el servidor en 5 segundos. Apagando forzosamente");
+    process.exit(1);
+  }, 5000);
+}

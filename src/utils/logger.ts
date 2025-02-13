@@ -5,20 +5,39 @@ import fs from "fs";
 const verificarExistenciaArchivosLog = () => {
   const rutaArchivo = `${__dirname}/../../logs`;
   if (!fs.existsSync(rutaArchivo)) fs.mkdirSync(rutaArchivo);
-  if (!fs.existsSync(`${rutaArchivo}/app.log`))
-    fs.closeSync(fs.openSync(`${rutaArchivo}/app.log`, "a"));
+  const nombresLogs = ["info.log", "error.log"];
+  nombresLogs.forEach((log) => {
+    if (!fs.existsSync(`${rutaArchivo}/${log}`))
+      fs.closeSync(fs.openSync(`${rutaArchivo}/${log}`, "a"));
+  });
 };
 verificarExistenciaArchivosLog();
 
-export const logger = pino(
-  {
-    transport: {
-      target: "pino-pretty",
-      options: {
-        translateTime: "SYS:dd-mm-yyyy HH:MM:ss",
-        ignore: "pid,hostname",
+/**
+ * Docs: https://betterstack.com/community/guides/logging/how-to-install-setup-and-use-pino-to-log-node-js-applications/
+ */
+export const logger = pino({
+  base: null,
+  transport: {
+    targets: [
+      { target: "pino-pretty" },
+      {
+        target: "pino/file",
+        level: "info",
+        options: {
+          destination: `${__dirname}/../../logs/info.log`,
+          ignore: "pid,hostname",
+        },
       },
-    },
+      {
+        target: "pino/file",
+        level: "error",
+        options: {
+          destination: `${__dirname}/../../logs/error.log`,
+          ignore: "pid,hostname",
+        },
+      },
+    ],
   },
-  pino.destination(`${__dirname}/../../logs/app.log`)
-);
+  timestamp: () => `,"time":"${new Date().toLocaleString()}"`,
+});
