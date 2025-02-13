@@ -252,6 +252,7 @@ header: {
 body: {
   articulos: Pick<EspecificacionEnvio, "articuloId" | "cantidad">[];
   origenEnvio: Punto;
+  destinoEnvio: Punto;
 }
 
 respuesta: {

@@ -8,6 +8,7 @@ import { logger } from "./utils/logger";
 import { manejadorErrores } from "./middlewares/manejadorErrores";
 import { config } from "dotenv";
 import { Server } from "http";
+import { conectarRabbit } from "./rabbit";
 config();
 
 process.on("uncaughtException", (error) => {
@@ -43,6 +44,7 @@ let servidor: Server;
 void (async () => {
   try {
     await conectarBD();
+    await conectarRabbit();
     servidor = app.listen(PUERTO_SERVIDOR);
     logger.info("Base de datos conectada y servidor iniciado en puerto " + PUERTO_SERVIDOR);
   } catch (error: unknown) {
