@@ -364,18 +364,6 @@ type EnvioCercanoADestino = {
   tiempoRestanteAproximadoMin: number;
 }
 
-// Routing key: catalog.article_exist
-// Extraido de lo definido en el microservicio de Catalog
-// Este microservicio de delivery tendrá que consumir en una queue los mensajes
-// con routingKey "delivery_article_exist"
-type EmitirValidacionExistenciaArticulo = {
-  exchange: "article_exist", // exhange al que se devolverá la respuesta
-  routingKey: "delivery_article_exist", // routing key a usar desde Catalog cuando se responda con otro mensaje article_exist
-  message: {
-	  articleId: string;
-	  referenceId: string;
-  }
-}
 ```
 
 ### Mensajes consumidos
@@ -389,22 +377,6 @@ UserRegistered: {
   name: string;
   address: Punto;
 }
-```
-
-- **Existencia de articulo**
-Respuesta recibida desde Catalog tras haber emitido el mensaje "article_exist" hacia Catalog
-
-```ts
-Consume mensaje: ConsumirValidacionExistenciaArticulo
-ConsumirValidacionExistenciaArticulo: {
-  articleId: string;
-  price: number;
-  referenceId: string;
-  stock: number;
-  valid: boolean;
-}
-
-// actualiza el flag "valido" del articulo
 ```
 
 - **Crear un envío**
