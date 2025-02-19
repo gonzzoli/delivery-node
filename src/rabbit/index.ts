@@ -24,27 +24,48 @@ export const desconectarRabbit = async () => {
   }
 };
 
+export const TIPOS_EXCHANGE = {
+  DIRECT: "direct",
+  FANOUT: "fanout",
+  TOPIC: "topic",
+  HEADERS: "headers",
+} as const;
+
 export const fabricaEmitirMensajeExchangeRabbit =
-  <T>(exchange: string, routingKey: string) =>
+  <T>(
+    exchange: string,
+    tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
+    routingKey: string
+  ) =>
   async (mensaje: T) => {
     const conexion = await conectarRabbit();
     const canal = await conexion.createChannel();
-    await canal.assertExchange(exchange, "direct", { durable: true });
+    await canal.assertExchange(exchange, tipoExchange, { durable: true });
     canal.publish(DELIVERY_EXCHANGE, routingKey, Buffer.from(JSON.stringify(mensaje)));
   };
 
 export const fabricaConsumirMensajeExchangeRabbit =
-  (exchange: string, routingKey: string) => async (callback: (mensaje: unknown) => void) => {
+  (
+    exchange: string,
+    tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
+    routingKey: string
+  ) =>
+  async (callback: (mensaje: unknown) => void) => {
     const conexion = await conectarRabbit();
     const canal = await conexion.createChannel();
 
-    await canal.assertExchange(exchange, "direct", { durable: true });
+    await canal.assertExchange(exchange, tipoExchange, { durable: true });
     const { queue } = await canal.assertQueue("", { exclusive: true });
     await canal.bindQueue(queue, exchange, routingKey);
     await canal.consume(
       queue,
-      (mensaje) => (mensaje ? callback(JSON.parse(mensaje.content.toString())) : null),
-      { noAck: true }
+      (mensaje) => {
+        if (mensaje) {
+          callback(JSON.parse(mensaje.content.toString()));
+          canal.ack(mensaje);
+        }
+      },
+      { noAck: false }
     );
   };
 

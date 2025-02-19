@@ -27,3 +27,9 @@ export const schemaActualizarUbicacionEnvioDTO = z.object({
 });
 
 export type ActualizarUbicacionEnvioDTO = ExtraerRestDTO<typeof schemaActualizarUbicacionEnvioDTO>;
+
+export const schemaBuscarEnvioDTO = z.object({
+  params: z.object({ envioId: stringZod("id del envio") }),
+});
+
+export type BuscarEnvioDTO = ExtraerRestDTO<typeof schemaBuscarEnvioDTO>;

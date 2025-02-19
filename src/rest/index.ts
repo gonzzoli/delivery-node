@@ -6,6 +6,6 @@ const router = Router();
 router.use("/envios", routerEnvios);
 router.use("/usuarios", routerUsuarios);
 
-router.get("/provincias", tryCatchControlador());
+router.get("/provincias", routerProvincias);
 
 export default router;

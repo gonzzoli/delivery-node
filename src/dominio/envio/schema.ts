@@ -12,6 +12,11 @@ type Latitud = Etiquetado<number, "Latitud">;
 type Longitud = Etiquetado<number, "Longitud">;
 export type Punto = [Latitud, Longitud];
 
+export type Parametro = {
+  nombre: string;
+  valor: number;
+};
+
 export type Provincia = {
   id: Etiquetado<string, "ProvinciaId">;
   nombre: string;
