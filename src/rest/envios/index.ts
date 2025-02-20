@@ -2,10 +2,10 @@ import { Router } from "express";
 import { tryCatchControlador } from "../../errores/tryCatch";
 import { validarRequest } from "../../middlewares/midValidarRequest";
 import { schemaActualizarUbicacionEnvioDTO } from "./dto";
-import { buscarEnvios } from "./endpoints/buscarEnvios";
-import { buscarEnvio } from "./endpoints/buscarEnvio";
-import { calcularEnvio } from "./endpoints/calcularEnvio";
-import { actualizarUbicacionEnvio } from "./endpoints/actualizarUbicacionEnvio";
+import { buscarEnvios } from "./controladores/buscarEnvios";
+import { buscarEnvio } from "./controladores/buscarEnvio";
+import { calcularEnvio } from "./controladores/calcularEnvio";
+import { actualizarUbicacionEnvio } from "./controladores/actualizarUbicacionEnvio";
 
 const router = Router();
 

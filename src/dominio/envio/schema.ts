@@ -4,7 +4,6 @@ import { Etiquetado } from "../../utils/Etiquetado";
 // Definición de Ids
 type OrdenId = Etiquetado<EntidadId, "OrdenId">;
 type UsuarioId = Etiquetado<EntidadId, "UsuarioId">;
-type ArticuloId = Etiquetado<EntidadId, "ArticuloId">;
 export type CarritoId = Etiquetado<EntidadId, "CarritoId">;
 
 // Defino estos tipos porque el orden dentro del arreglo es importante
@@ -32,7 +31,6 @@ export type Usuario = {
 };
 
 export type Articulo = {
-  articuloId: ArticuloId;
   nombre: string;
   peso: number;
   largo: number;

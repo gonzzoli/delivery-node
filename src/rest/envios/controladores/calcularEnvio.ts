@@ -1,23 +1,24 @@
 import { Request, Response } from "express";
 import { CalcularEnvioDTO } from "../dto";
 import { CodigosHTTP } from "../../../utils/codigosHTTP";
-import { coleccionesMongo } from "../../../config/bd";
+import { coleccionesMongo, getColeccion } from "../../../config/bd";
 import { Articulo } from "../../../dominio/envio/schema";
 import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
 import { ResCalcularEnvio } from "../respuestas";
 import turf from "@turf/turf";
+import { ObjectId, WithId } from "mongodb";
 
 export const calcularEnvio = async (req: Request, res: Response) => {
   const dto = req.datosValidados as CalcularEnvioDTO;
 
   // Se buscan todos los articulos solicitados. Si alguno no está en la BD entonces no tenemos sus dimensiones,
   // por lo que no podemos calcular su espacio y peso, y por ende tampoco su precio. Lanzamos un error en ese caso
-  const articulosBD = new Map<string, Articulo>(
+  const articulosBD = new Map<string, WithId<Articulo>>(
     (
       await Promise.all(
         dto.articulos.map(async (articulo) => {
-          const articuloEncontrado = await coleccionesMongo.articulos?.findOne({
-            articuloId: articulo.articuloId as Articulo["articuloId"],
+          const articuloEncontrado = await getColeccion(coleccionesMongo.articulos).findOne({
+            _id: new ObjectId(articulo.articuloId),
           });
 
           if (articuloEncontrado) return articuloEncontrado;
@@ -26,7 +27,7 @@ export const calcularEnvio = async (req: Request, res: Response) => {
           );
         })
       )
-    ).map((art) => [art.articuloId, art])
+    ).map((art) => [art._id.toHexString(), art])
   );
 
   const [precioPorKm, precioPorM2, precioPorKg] = await Promise.all([
@@ -47,7 +48,7 @@ export const calcularEnvio = async (req: Request, res: Response) => {
         articuloBD.peso * precioPorKg!.valor +
         articuloBD.ancho * articuloBD.largo * precioPorM2!.valor;
       return {
-        articuloId: articuloBD.articuloId,
+        articuloId: articuloBD._id.toHexString(),
         nombre: articuloBD.nombre,
         cantidad: articuloPedido.cantidad,
         // Solo la primera unidad se cobra completa, el resto al 50% para simular descuento de por mayor

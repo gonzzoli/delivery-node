@@ -23,6 +23,7 @@ declare global {
       MONGO_CONN_STRING: string;
       MONGO_DB_NAME: string;
       RABBIT_URL: string;
+      CATALOG_API_BASE_URL: string;
     }
   }
 }

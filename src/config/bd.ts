@@ -1,4 +1,4 @@
-import mongoDB from "mongodb";
+import mongoDB, { Document } from "mongodb";
 import { logger } from "../utils/logger";
 import { ErrorConexionBD } from "../errores/clasesErrores";
 import { Articulo, Envio, Parametro, Provincia, Usuario } from "../dominio/envio/schema";
@@ -25,6 +25,15 @@ export async function conectarBD() {
     logger.error(error, "Error conectando a la base de datos");
     throw new ErrorConexionBD((error as Error).message);
   }
+}
+
+/**
+ * Algo como un typeguard para que la coleccion nunca sea undefined y no debamos usar
+ * el ? para acceder a ellas
+ */
+export function getColeccion<T extends Document>(coleccion: mongoDB.Collection<T> | undefined) {
+  if (!coleccion) throw new Error("Colección no inicializada");
+  return coleccion;
 }
 
 export async function desconectarBD() {

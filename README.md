@@ -265,15 +265,7 @@ respuesta: {
 - **Registrar/Actualizar articulo**
 Se crea el articulo si no existia (se debe validar con Catalog), o se actualiza si ya estaba (no es necesario validarlo)
 ```ts
-// REGISTRAR
-POST /articulos
-header: {
-  Authorization: "Bearer {jwt}"
-}
-body: Articulo
-
-// ACTUALIZAR
-PATCH /articulos/{articuloId}
+POST /articulos/{articuloId}
 header: {
   Authorization: "Bearer {jwt}"
 }
