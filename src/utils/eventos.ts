@@ -1,4 +1,3 @@
-import uuid from "uuid";
 import { EntidadId } from "./entidadId";
 import { Etiquetado } from "./Etiquetado";
 
@@ -7,27 +6,22 @@ import { Etiquetado } from "./Etiquetado";
  * Debe ser asi para mantener consistencia y porque todos se guardan en la misma tabla de la BD
  */
 export type EventoAplicacion<
-  AgregadoTipo extends string,
   AgregadoId extends EntidadId,
   NombreEvento extends string,
   Contenido extends Record<string, unknown> | null,
 > = {
-  id: Etiquetado<string, "EventoAplicacionId">;
+  _id: Etiquetado<string, "EventoAplicacionId">;
   agregadoId: AgregadoId;
-  agregadoTipo: AgregadoTipo;
   fyhEvento: Date;
   secuenciaEvento: number;
   nombreEvento: NombreEvento;
   contenido: Contenido;
 };
 export type CualquierEventoAplicacion = EventoAplicacion<
-  string,
   EntidadId,
   string,
   Record<string, unknown> | null
 >;
-
-export const generarIdEvento = () => uuid.v7() as CualquierEventoAplicacion["id"];
 
 /**
  * Tipo a aplicar en los manejadores de eventos de cada agregado.
@@ -53,20 +47,3 @@ export const evolucionarAgregado =
 
     return estadoActual;
   };
-
-const registrarEvento = <Evento extends CualquierEventoAplicacion>(evento: Evento) => {
-  // insertar en mongo
-};
-
-const buscarEventosDeAgregado = <EventosAgregado extends CualquierEventoAplicacion>(
-  agregadoId: string
-) => {
-  // buscar en mongo
-};
-
-const RepoEventosAplicacion = {
-  registrarEvento,
-  buscarEventosDeAgregado,
-};
-
-export default RepoEventosAplicacion;

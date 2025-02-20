@@ -1,8 +1,10 @@
+import { OrderPlacedData } from "../../rabbit/consumir";
+import { EntidadId } from "../../utils/entidadId";
+import { Etiquetado } from "../../utils/Etiquetado";
 import { EventoAplicacion, evolucionarAgregado } from "../../utils/eventos";
 import { Envio, Punto } from "./schema";
 
 type EventoEnvioCreado = EventoAplicacion<
-  "Envio",
   Envio["envioId"],
   "EnvioCreado",
   Omit<Envio & { estado: "RETIRO PENDIENTE" }, "estado">
@@ -11,29 +13,30 @@ type EventoEnvioCreado = EventoAplicacion<
 type EventoEnvioDespachado = EventoAplicacion<"Envio", Envio["envioId"], "EnvioDespachado", null>;
 
 type EventoEnvioUbicacionActualizada = EventoAplicacion<
-  "Envio",
   Envio["envioId"],
   "EnvioUbicacionActualizada",
   { fyhUbicacion: Date; ubicacion: Punto }
 >;
 
 type EventoEnvioEntregado = EventoAplicacion<
-  "Envio",
   Envio["envioId"],
   "EnvioEntregado",
   { fyhEntrega: Date }
 >;
 
 type EventoEnvioCercanoADestino = EventoAplicacion<
-  "Envio",
   Envio["envioId"],
   "EnvioCercanoADestino",
   Envio
 >;
 
-type EventoEnvioNoPosible = EventoAplicacion<"Order", Orde, "EnvioNoPosible", { motivo: string }>;
+type EventoEnvioNoPosible = EventoAplicacion<
+  ,
+  "EnvioNoPosible",
+  { motivo: string }
+>;
 
-type EventosEnvio =
+export type EventosEnvio =
   | EventoEnvioCreado
   | EventoEnvioDespachado
   | EventoEnvioEntregado

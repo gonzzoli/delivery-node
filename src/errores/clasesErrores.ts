@@ -12,6 +12,7 @@ export enum CodigosError {
   RECURSO_YA_EXISTENTE,
   RECURSO_AJENO,
   RECURSO_NO_ENCONTRADO,
+  ENTIDAD_ACCION_INVALIDA,
 }
 
 export class ErrorAplicacion extends Error {
@@ -170,5 +171,21 @@ export class ErrorRecursoNoEncontrado extends ErrorAplicacion {
     );
     Object.setPrototypeOf(this, ErrorRecursoNoEncontrado.prototype);
     this.name = "ErrorRecursoNoEncontrado";
+  }
+}
+
+/**
+ * Cuando se envian parametros que no son numeros en la parte de paginacion
+ */
+export class ErrorEntidadAccionInvalida extends ErrorAplicacion {
+  constructor(mensajeForzado?: string) {
+    super(
+      "Acción invalida sobre la entidad",
+      CodigosHTTP.BAD_REQUEST,
+      mensajeForzado ?? "La acción que estas intentando realizar sobre la entidad no es valida.",
+      CodigosError.ENTIDAD_ACCION_INVALIDA
+    );
+    Object.setPrototypeOf(this, ErrorEntidadAccionInvalida.prototype);
+    this.name = "ErrorEntidadAccionInvalida";
   }
 }

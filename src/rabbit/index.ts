@@ -45,12 +45,13 @@ export const fabricaEmitirMensajeExchangeRabbit =
   };
 
 export const fabricaConsumirMensajeExchangeRabbit =
-  (
+  <T>(
     exchange: string,
     tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
-    routingKey: string
+    routingKey: string,
+    callback: (mensaje: T) => Promise<void>
   ) =>
-  async (callback: (mensaje: unknown) => void) => {
+  async () => {
     const conexion = await conectarRabbit();
     const canal = await conexion.createChannel();
 
@@ -59,9 +60,9 @@ export const fabricaConsumirMensajeExchangeRabbit =
     await canal.bindQueue(queue, exchange, routingKey);
     await canal.consume(
       queue,
-      (mensaje) => {
+      async (mensaje) => {
         if (mensaje) {
-          callback(JSON.parse(mensaje.content.toString()));
+          await callback(JSON.parse(mensaje.content.toString()) as T);
           canal.ack(mensaje);
         }
       },

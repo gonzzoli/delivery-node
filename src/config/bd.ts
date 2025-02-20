@@ -2,9 +2,11 @@ import mongoDB, { Document } from "mongodb";
 import { logger } from "../utils/logger";
 import { ErrorConexionBD } from "../errores/clasesErrores";
 import { Articulo, Envio, Parametro, Provincia, Usuario } from "../dominio/envio/schema";
+import { EventosEnvio } from "../dominio/envio/eventos";
 
 type ColeccionesBD = {
   envios?: mongoDB.Collection<Envio>;
+  eventosEnvios?: mongoDB.Collection<EventosEnvio>;
   articulos?: mongoDB.Collection<Articulo>;
   usuarios?: mongoDB.Collection<Usuario>;
   provincias?: mongoDB.Collection<Provincia>;
