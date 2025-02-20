@@ -1,0 +1,120 @@
+version: '3.8'
+services:
+  rabbit:
+    image: rabbitmq:3.13.6-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    networks:
+      - microservicios-net
+
+  mongodb:
+    image: mongo:4.0.18-xenial
+    ports:
+      - "27017:27017"
+    networks:
+      - microservicios-net
+    volumes:
+      - microservicios-mongodb:/data/db
+
+  redis:
+    image: redis:5.0.9-buster
+    ports:
+      - "6379:6379"
+    networks:
+      - microservicios-net
+
+  auth:
+    image: prod-auth-go
+    ports:
+      - "3000:3000"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+  image:
+    image: prod-image-go
+    ports:
+      - "3001:3001"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+
+  orders:
+    image: prod-orders-go
+    ports:
+      - "3004:3004"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+
+  catalog:
+    image: prod-cataloggo-go
+    ports:
+      - "3002:3002"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+
+  cart:
+    image: prod-cartgo-go
+    ports:
+      - "3003:3003"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+  
+  delivery:
+    build: .
+    ports:
+      - "3005:3005"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+
+  api-cli:
+    image: prod-api-cli
+    ports:
+      - "4200:80"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+  
+  gql_gateway:
+    image: prod-gql_gateway
+    ports:
+      - "4080:4080"
+    networks:
+      - microservicios-net
+    depends_on:
+      - mongodb
+      - redis
+      - rabbit
+
+networks:
+  microservicios-net:
+    name: 'microservicios-net'
+
+volumes:
+  microservicios-mongodb:
+    name: 'microservicios-mongodb'
