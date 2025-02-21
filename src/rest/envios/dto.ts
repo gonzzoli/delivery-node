@@ -1,7 +1,12 @@
 import z from "zod";
 import { ExtraerRestDTO, numberZod, stringZod } from "../../utils/zodUtils";
+import { Punto } from "../../dominio/envio/schema";
 
-export const schemaPuntoDTO = z.number().array().length(2);
+export const schemaPuntoDTO = z
+  .number()
+  .array()
+  .length(2)
+  .transform((punto) => punto as Punto);
 
 export const schemaCalcularEnvioDTO = z.object({
   body: z.object({

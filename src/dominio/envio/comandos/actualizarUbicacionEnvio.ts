@@ -1,10 +1,11 @@
 import { ObjectId } from "mongodb";
 import { coleccionesMongo, getColeccion } from "../../../config/bd";
-import { Envio, Punto } from "../schema";
+import { Envio, ESTADOS_ENVIO, Punto } from "../schema";
 import {
   ErrorEntidadAccionInvalida,
   ErrorRecursoNoEncontrado,
 } from "../../../errores/clasesErrores";
+import { EventoEnvio, evolucionarEnvio } from "../eventos";
 
 export const actualizarUbicacionEnvio = async (
   envioId: Envio["envioId"],
@@ -15,12 +16,21 @@ export const actualizarUbicacionEnvio = async (
   });
 
   if (!envio) throw new ErrorRecursoNoEncontrado("No se ha encontrado el envio");
-  if (envio.estado !== "EN CAMINO")
+  if (envio.estado !== ESTADOS_ENVIO.EN_CAMINO)
     throw new ErrorEntidadAccionInvalida(
       "El estado del envio es " +
         envio.estado +
         ". Solo puedes actualizar la ubicación de un envio que se encuentra en camino."
     );
 
-    
+  const eventoUbicacionActualizada: EventoEnvio & {
+    nombreEvento: "EnvioUbicacionActualizada";
+  } = {
+    agregadoId: envio._id.toHexString() as Envio["envioId"],
+    fyhEvento: new Date(),
+    secuenciaEvento: ,
+    nombreEvento: "EnvioUbicacionActualizada",
+    contenido: { fyhUbicacion: new Date(), ubicacion: nuevaUbicacion },
+  };
+  const agregadoEvolucionado = evolucionarEnvio([eventoUbicacionActualizada], envio);
 };

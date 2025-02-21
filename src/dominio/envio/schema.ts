@@ -1,9 +1,10 @@
 import { EntidadId } from "../../utils/entidadId";
 import { Etiquetado } from "../../utils/Etiquetado";
+import { Usuario } from "../usuario/schema";
 
 // Definición de Ids
-type OrdenId = Etiquetado<EntidadId, "OrdenId">;
-type UsuarioId = Etiquetado<EntidadId, "UsuarioId">;
+export type OrdenId = Etiquetado<EntidadId, "OrdenId">;
+
 export type CarritoId = Etiquetado<EntidadId, "CarritoId">;
 
 // Defino estos tipos porque el orden dentro del arreglo es importante
@@ -23,13 +24,6 @@ export type Provincia = {
   polilineaLimite: Punto[];
 };
 
-export type Usuario = {
-  usuarioId: UsuarioId;
-  nombre: string;
-  coordenadas: Punto;
-  provincia: Omit<Provincia, "polilineaLimite">;
-};
-
 export type Articulo = {
   nombre: string;
   peso: number;
@@ -44,7 +38,7 @@ export const ESTADOS_ENVIO = {
   ENTREGADO: "ENTREGADO",
 } as const;
 export type EstadoEnvio = (typeof ESTADOS_ENVIO)[keyof typeof ESTADOS_ENVIO];
-export type EspecificacionEnvio = Articulo & {
+export type EspecificacionArticuloEnvio = Articulo & {
   cantidad: number;
 };
 
@@ -55,22 +49,22 @@ export type Envio = {
   envioId: Etiquetado<EntidadId, "EnvioId">;
   codigoEnvio: string;
   ordenId: OrdenId;
-  usuarioCompradorId: UsuarioId;
+  usuarioCompradorId: Usuario["usuarioId"];
   origen: Punto; // Indicado en el mensaje de order_placed
   destino: Punto; // Extraido del usuario comprador
   fyhEstimadaEntrega: Date;
   fyhAlta: Date;
   costo: number;
-  especificacion: EspecificacionEnvio;
+  especificacion: EspecificacionArticuloEnvio[];
 } & ( // Dependiendo del estado del envío serán las propiedades que tenga
   | {
-      estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO;
-    }
+    estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO;
+  }
   | {
-      estado: typeof ESTADOS_ENVIO.EN_CAMINO;
-      fyhDespacho: Date;
-      ubicacionActual: Punto;
-      recorrido: RecorridoRealizadoEnvio;
+    estado: typeof ESTADOS_ENVIO.EN_CAMINO;
+    fyhDespacho: Date;
+    ubicacionActual: Punto;
+    recorrido: RecorridoRealizadoEnvio;
     }
   | {
       estado: typeof ESTADOS_ENVIO.ENTREGADO;

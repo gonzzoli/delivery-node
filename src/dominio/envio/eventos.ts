@@ -1,16 +1,17 @@
-import { OrderPlacedData } from "../../rabbit/consumir";
-import { EntidadId } from "../../utils/entidadId";
-import { Etiquetado } from "../../utils/Etiquetado";
 import { EventoAplicacion, evolucionarAgregado } from "../../utils/eventos";
-import { Envio, Punto } from "./schema";
+import { Envio, ESTADOS_ENVIO, Punto, RecorridoRealizadoEnvio } from "./schema";
 
 type EventoEnvioCreado = EventoAplicacion<
   Envio["envioId"],
   "EnvioCreado",
-  Omit<Envio & { estado: "RETIRO PENDIENTE" }, "estado">
+  Omit<Envio, "estado"> & { estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO }
 >;
 
-type EventoEnvioDespachado = EventoAplicacion<"Envio", Envio["envioId"], "EnvioDespachado", null>;
+type EventoEnvioDespachado = EventoAplicacion<
+  Envio["envioId"],
+  "EnvioDespachado",
+  { fyhDespacho: Date; ubicacionActual: Punto; recorrido: RecorridoRealizadoEnvio }
+>;
 
 type EventoEnvioUbicacionActualizada = EventoAplicacion<
   Envio["envioId"],
@@ -24,36 +25,39 @@ type EventoEnvioEntregado = EventoAplicacion<
   { fyhEntrega: Date }
 >;
 
-type EventoEnvioCercanoADestino = EventoAplicacion<
-  Envio["envioId"],
-  "EnvioCercanoADestino",
-  Envio
->;
-
-type EventoEnvioNoPosible = EventoAplicacion<
-  ,
-  "EnvioNoPosible",
-  { motivo: string }
->;
-
-export type EventosEnvio =
+export type EventoEnvio =
   | EventoEnvioCreado
   | EventoEnvioDespachado
   | EventoEnvioEntregado
   | EventoEnvioUbicacionActualizada;
 
-const evolucionarEnvio = evolucionarAgregado<Envio, EventosEnvio>((envio, evento) => {
-  if (!envio) return evento.contenido;
+export const evolucionarEnvio = evolucionarAgregado<Envio, EventoEnvio>((envio, evento) => {
+  if (!envio) return evento.contenido as EventoEnvioCreado["contenido"];
 
   switch (evento.nombreEvento) {
     case "EnvioCreado":
       return { ...evento.contenido, estado: "PENDIENTE DE DESPACHO" };
     case "EnvioDespachado":
-      return { ...evento.contenido, estado: "EN CAMINO" };
+      return {
+        ...(envio as Envio & { estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO }),
+        ...evento.contenido,
+        estado: "EN CAMINO",
+      };
     case "EnvioEntregado":
-      return { ...evento.contenido, estado: "ENTREGADO" };
+      return {
+        ...(envio as Envio & { estado: typeof ESTADOS_ENVIO.EN_CAMINO }),
+        ...evento.contenido,
+        estado: "ENTREGADO",
+      };
     case "EnvioUbicacionActualizada":
-      return { ...envio, ...evento.contenido };
-      break;
+      return {
+        ...(envio as Envio & { estado: typeof ESTADOS_ENVIO.EN_CAMINO }),
+        ...evento.contenido,
+      };
+    default:
+      // Dado que es un Error (y no un custom error) no se le dará esta respuesta al cliente
+      throw new Error(
+        "Ocurrió un error en la lógica de evolución del agregado Envio. Por favor revisa la lógica del código"
+      );
   }
 });
