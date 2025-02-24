@@ -13,3 +13,12 @@ fabricaConsumirMensajeExchangeRabbit<OrderPlacedData>(
     await crearEnvioDesdeOrden(mensaje);
   }
 );
+
+fabricaConsumirMensajeExchangeRabbit<OrderPlacedData>(
+  "user_registered",
+  TIPOS_EXCHANGE.FANOUT,
+  "",
+  async (mensaje) => {
+    await crearEnvioDesdeOrden(mensaje);
+  }
+);

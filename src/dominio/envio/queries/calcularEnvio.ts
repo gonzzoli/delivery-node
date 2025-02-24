@@ -1,13 +1,14 @@
 import { ObjectId, WithId } from "mongodb";
-import { Articulo, Punto } from "../schema";
+import { Articulo } from "../schema";
 import { coleccionesMongo, getColeccion } from "../../../config/bd";
 import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
 import turf from "@turf/turf";
 import { ResCalcularEnvio } from "../../../rest/envios/respuestas";
+import { Point } from "geojson";
 
 type CalcularEnvioParams = {
-  origenEnvio: Punto;
-  destinoEnvio: Punto;
+  origenEnvio: Point;
+  destinoEnvio: Point;
   articulos: {
     articuloId: string;
     cantidad: number;

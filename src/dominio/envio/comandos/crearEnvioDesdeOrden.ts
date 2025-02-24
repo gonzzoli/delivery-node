@@ -5,14 +5,16 @@ import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
 import { Usuario } from "../../usuario/schema";
 import type { EventoEnvio } from "../eventos";
 import QueriesEnvio from "../queries";
-import { CarritoId, Envio, OrdenId, Punto } from "../schema";
+import { CarritoId, OrdenId } from "../schema";
+import { Point } from "geojson";
+import { emitirEnvioCreado } from "../../../rabbit/emitir";
 
 export type OrderPlacedData = {
   orderId: OrdenId;
   cartId: CarritoId;
   userId: Usuario["usuarioId"];
-  originAddress: Punto;
-  destinationAddress: Punto;
+  originAddress: Point;
+  destinationAddress: Point;
   articles: { articleId: string; quantity: number }[];
 };
 export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
@@ -35,17 +37,17 @@ export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
       cantidad: a.quantity,
     })),
   });
-  const nuevoEnvioId = new ObjectId().toHexString() as Envio["envioId"];
+  const nuevoEnvioId = new ObjectId();
   const eventoEnvioCreado: EventoEnvio = {
     nombreEvento: "EnvioCreado",
-    agregadoId: nuevoEnvioId,
+    agregadoId: nuevoEnvioId.toHexString(),
     fyhEvento: new Date(),
     secuenciaEvento: 1,
     contenido: {
       fyhAlta: new Date(),
       fyhEstimadaEntrega: dayjs().add(envioCalculado.duracionEstimadaMins, "minutes").toDate(),
       estado: "PENDIENTE DE DESPACHO",
-      envioId: nuevoEnvioId,
+      _id: nuevoEnvioId.toHexString(),
       origen: orden.originAddress,
       destino: orden.destinationAddress,
       costo: envioCalculado.precioTotal,
@@ -68,5 +70,11 @@ export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
   await getColeccion(coleccionesMongo.eventosEnvios).insertOne(eventoEnvioCreado);
   // Esta vez simplemente guardamos el contenido del evento porque es el primero, pero en otros eventos
   // se debe aplicar el evento a la proyeccion anterior, y luego guardar la proyección actualizada
-  await getColeccion(coleccionesMongo.envios).insertOne(eventoEnvioCreado.contenido);
+  void getColeccion(coleccionesMongo.envios).insertOne({
+    ...eventoEnvioCreado.contenido,
+    _id: nuevoEnvioId,
+  });
+
+  // y emitimos el evento
+  void emitirEnvioCreado(eventoEnvioCreado.contenido);
 };

@@ -6,6 +6,8 @@ import { buscarEnvios } from "./controladores/buscarEnvios";
 import { buscarEnvio } from "./controladores/buscarEnvio";
 import { calcularEnvio } from "./controladores/calcularEnvio";
 import { actualizarUbicacionEnvio } from "./controladores/actualizarUbicacionEnvio";
+import { despacharEnvio } from "./controladores/despacharEnvio";
+import { entregarEnvio } from "./controladores/entregarEnvio";
 
 const router = Router();
 
@@ -18,7 +20,7 @@ router.post(
   validarRequest(schemaActualizarUbicacionEnvioDTO),
   tryCatchControlador(actualizarUbicacionEnvio)
 );
-router.post("/:envioId/entrega", tryCatchControlador());
-router.post("", tryCatchControlador());
+router.post("/:envioId/despachar", tryCatchControlador(despacharEnvio));
+router.post("/:envioId/entregar", tryCatchControlador(entregarEnvio));
 
 export default router;

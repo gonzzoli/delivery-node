@@ -1,3 +1,4 @@
+import { FeatureCollection, LineString, Point } from "geojson";
 import { EntidadId } from "../../utils/entidadId";
 import { Etiquetado } from "../../utils/Etiquetado";
 import { Usuario } from "../usuario/schema";
@@ -7,21 +8,15 @@ export type OrdenId = Etiquetado<EntidadId, "OrdenId">;
 
 export type CarritoId = Etiquetado<EntidadId, "CarritoId">;
 
-// Defino estos tipos porque el orden dentro del arreglo es importante
-type Latitud = Etiquetado<number, "Latitud">;
-type Longitud = Etiquetado<number, "Longitud">;
-export type Punto = [Latitud, Longitud];
-
 export type Parametro = {
   nombre: string;
   valor: number;
 };
 
 export type Provincia = {
-  id: Etiquetado<string, "ProvinciaId">;
   nombre: string;
   // Dato geografico para marcar el limite de la provincia. Usado para calcular el costo
-  polilineaLimite: Punto[];
+  polilineaLimite: LineString;
 };
 
 export type Articulo = {
@@ -44,27 +39,26 @@ export type EspecificacionArticuloEnvio = Articulo & {
 
 // fyh = Fecha y Hora
 // Todos los puntos que ha registrado en cada actualizacion de ubicacion
-export type RecorridoRealizadoEnvio = (Punto & { fyhUbicacion: Date })[];
+export type RecorridoRealizadoEnvio = FeatureCollection<Point, { fyhUbicacion: Date }>;
 export type Envio = {
-  envioId: Etiquetado<EntidadId, "EnvioId">;
-  codigoEnvio: string;
+  codigoEntrega: string;
   ordenId: OrdenId;
   usuarioCompradorId: Usuario["usuarioId"];
-  origen: Punto; // Indicado en el mensaje de order_placed
-  destino: Punto; // Extraido del usuario comprador
+  origen: Point; // Indicado en el mensaje de order_placed
+  destino: Point; // Extraido del usuario comprador
   fyhEstimadaEntrega: Date;
   fyhAlta: Date;
   costo: number;
   especificacion: EspecificacionArticuloEnvio[];
 } & ( // Dependiendo del estado del envío serán las propiedades que tenga
   | {
-    estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO;
-  }
+      estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO;
+    }
   | {
-    estado: typeof ESTADOS_ENVIO.EN_CAMINO;
-    fyhDespacho: Date;
-    ubicacionActual: Punto;
-    recorrido: RecorridoRealizadoEnvio;
+      estado: typeof ESTADOS_ENVIO.EN_CAMINO;
+      fyhDespacho: Date;
+      ubicacionActual: Point;
+      recorrido: RecorridoRealizadoEnvio;
     }
   | {
       estado: typeof ESTADOS_ENVIO.ENTREGADO;

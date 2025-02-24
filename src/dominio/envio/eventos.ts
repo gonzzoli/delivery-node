@@ -1,29 +1,23 @@
+import { Point } from "geojson";
 import { EventoAplicacion, evolucionarAgregado } from "../../utils/eventos";
-import { Envio, ESTADOS_ENVIO, Punto, RecorridoRealizadoEnvio } from "./schema";
+import { Envio, ESTADOS_ENVIO, RecorridoRealizadoEnvio } from "./schema";
 
 type EventoEnvioCreado = EventoAplicacion<
-  Envio["envioId"],
   "EnvioCreado",
-  Omit<Envio, "estado"> & { estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO }
+  Omit<Envio, "estado"> & { estado: typeof ESTADOS_ENVIO.PENDIENTE_DE_DESPACHO; _id: string }
 >;
 
 type EventoEnvioDespachado = EventoAplicacion<
-  Envio["envioId"],
   "EnvioDespachado",
-  { fyhDespacho: Date; ubicacionActual: Punto; recorrido: RecorridoRealizadoEnvio }
+  { fyhDespacho: Date; ubicacionActual: Point; recorrido: RecorridoRealizadoEnvio }
 >;
 
 type EventoEnvioUbicacionActualizada = EventoAplicacion<
-  Envio["envioId"],
   "EnvioUbicacionActualizada",
-  { fyhUbicacion: Date; ubicacion: Punto }
+  { fyhUbicacion: Date; ubicacion: Point }
 >;
 
-type EventoEnvioEntregado = EventoAplicacion<
-  Envio["envioId"],
-  "EnvioEntregado",
-  { fyhEntrega: Date }
->;
+type EventoEnvioEntregado = EventoAplicacion<"EnvioEntregado", { fyhEntrega: Date }>;
 
 export type EventoEnvio =
   | EventoEnvioCreado

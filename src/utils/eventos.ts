@@ -1,26 +1,19 @@
-import { EntidadId } from "./entidadId";
-
 /**
  * Forma que deben tener los eventos de los distintos agregados de la aplicacion.
  * Debe ser asi para mantener consistencia y porque todos se guardan en la misma coleccion.
  * Son eventos para Event Sourcing, no para Rabbit.
  */
 export type EventoAplicacion<
-  AgregadoId extends EntidadId,
   NombreEvento extends string,
   Contenido extends Record<string, unknown> | null,
 > = {
-  agregadoId: AgregadoId;
+  agregadoId: string;
   fyhEvento: Date;
   secuenciaEvento: number;
   nombreEvento: NombreEvento;
   contenido: Contenido;
 };
-export type CualquierEventoAplicacion = EventoAplicacion<
-  EntidadId,
-  string,
-  Record<string, unknown> | null
->;
+export type CualquierEventoAplicacion = EventoAplicacion<string, Record<string, unknown> | null>;
 
 /**
  * Tipo a aplicar en los manejadores de eventos de cada agregado.

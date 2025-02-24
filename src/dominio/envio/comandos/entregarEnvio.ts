@@ -1,14 +1,14 @@
 import { ObjectId } from "mongodb";
 import { coleccionesMongo, getColeccion } from "../../../config/bd";
-import { ESTADOS_ENVIO } from "../schema";
 import {
   ErrorEntidadAccionInvalida,
+  ErrorRecursoAjeno,
   ErrorRecursoNoEncontrado,
 } from "../../../errores/clasesErrores";
+import { ESTADOS_ENVIO } from "../schema";
 import { EventoEnvio, evolucionarEnvio } from "../eventos";
-import { Point } from "geojson";
 
-export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: Point) => {
+export const entregarEnvio = async (envioId: string, codigoEntrega: string) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
     _id: new ObjectId(envioId),
   });
@@ -18,25 +18,28 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
     throw new ErrorEntidadAccionInvalida(
       "El estado del envio es " +
         envio.estado +
-        ". Solo puedes actualizar la ubicación de un envio que se encuentra en camino."
+        ". Solo puedes marcar como entregado un envio que se encuentra en camino."
     );
 
-  const eventoUbicacionActualizada: EventoEnvio & {
-    nombreEvento: "EnvioUbicacionActualizada";
+  if (envio.codigoEntrega !== codigoEntrega)
+    throw new ErrorRecursoAjeno("El codigo de entrega del envío no coincide con el proporcionado");
+
+  const eventoEnvioEntregado: EventoEnvio & {
+    nombreEvento: "EnvioEntregado";
   } = {
     agregadoId: envio._id.toHexString(),
     fyhEvento: new Date(),
     secuenciaEvento: 0,
-    nombreEvento: "EnvioUbicacionActualizada",
-    contenido: { fyhUbicacion: new Date(), ubicacion: nuevaUbicacion },
+    nombreEvento: "EnvioEntregado",
+    contenido: { fyhEntrega: new Date() },
   };
-  const agregadoEvolucionado = evolucionarEnvio([eventoUbicacionActualizada], envio);
+  const agregadoEvolucionado = evolucionarEnvio([eventoEnvioEntregado], envio);
 
-  await getColeccion(coleccionesMongo.eventosEnvios).insertOne(eventoUbicacionActualizada);
-  const envioActualizado = await getColeccion(coleccionesMongo.envios).findOneAndUpdate(
+  await getColeccion(coleccionesMongo.eventosEnvios).insertOne(eventoEnvioEntregado);
+  const envioEntregado = await getColeccion(coleccionesMongo.envios).findOneAndUpdate(
     { _id: envio._id },
     agregadoEvolucionado,
     { returnDocument: "after" }
   );
-  return envioActualizado;
+  return envioEntregado;
 };
