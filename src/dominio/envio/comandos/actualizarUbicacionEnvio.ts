@@ -7,6 +7,10 @@ import {
 } from "../../../errores/clasesErrores";
 import { EventoEnvio, evolucionarEnvio } from "../eventos";
 import { Point } from "geojson";
+import turf from "@turf/turf";
+import { calcularDuracionEstimadaViajeMins } from "../queries/calcularEnvio";
+import dayjs from "dayjs";
+import { emitirEnvioCercanoADestino } from "../../../rabbit/emitir";
 
 export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: Point) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -21,6 +25,8 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
         ". Solo puedes actualizar la ubicación de un envio que se encuentra en camino."
     );
 
+  const distanciaADestino = turf.distance(nuevaUbicacion, envio.destino);
+
   const eventoUbicacionActualizada: EventoEnvio & {
     nombreEvento: "EnvioUbicacionActualizada";
   } = {
@@ -28,7 +34,14 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
     fyhEvento: new Date(),
     secuenciaEvento: 0,
     nombreEvento: "EnvioUbicacionActualizada",
-    contenido: { fyhUbicacion: new Date(), ubicacion: nuevaUbicacion },
+    contenido: {
+      fyhUbicacion: new Date(),
+      ubicacion: nuevaUbicacion,
+      distanciaADestino,
+      fyhEstimadaEntrega: dayjs()
+        .add(calcularDuracionEstimadaViajeMins(distanciaADestino), "days")
+        .toDate(),
+    },
   };
   const agregadoEvolucionado = evolucionarEnvio([eventoUbicacionActualizada], envio);
 
@@ -38,5 +51,11 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
     agregadoEvolucionado,
     { returnDocument: "after" }
   );
+  if (distanciaADestino <= 100)
+    void emitirEnvioCercanoADestino({
+      envioId: envio._id.toHexString(),
+      distanciaRestanteKm: distanciaADestino,
+      tiempoRestanteAproximadoMin: calcularDuracionEstimadaViajeMins(distanciaADestino),
+    });
   return envioActualizado;
 };

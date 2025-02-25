@@ -1,4 +1,4 @@
-import { FeatureCollection, LineString, Point } from "geojson";
+import { FeatureCollection, Point, Polygon } from "geojson";
 import { EntidadId } from "../../utils/entidadId";
 import { Etiquetado } from "../../utils/Etiquetado";
 import { Usuario } from "../usuario/schema";
@@ -16,7 +16,7 @@ export type Parametro = {
 export type Provincia = {
   nombre: string;
   // Dato geografico para marcar el limite de la provincia. Usado para calcular el costo
-  polilineaLimite: LineString;
+  poligonoLimite: Polygon;
 };
 
 export type Articulo = {
@@ -46,7 +46,8 @@ export type Envio = {
   usuarioCompradorId: Usuario["usuarioId"];
   origen: Point; // Indicado en el mensaje de order_placed
   destino: Point; // Extraido del usuario comprador
-  fyhEstimadaEntrega: Date;
+  duracionEstimadaViajeMins: number;
+  distanciaTotal: number;
   fyhAlta: Date;
   costo: number;
   especificacion: EspecificacionArticuloEnvio[];
@@ -56,6 +57,8 @@ export type Envio = {
     }
   | {
       estado: typeof ESTADOS_ENVIO.EN_CAMINO;
+      fyhEstimadaEntrega: Date;
+      distanciaADestino: number;
       fyhDespacho: Date;
       ubicacionActual: Point;
       recorrido: RecorridoRealizadoEnvio;
@@ -63,6 +66,7 @@ export type Envio = {
   | {
       estado: typeof ESTADOS_ENVIO.ENTREGADO;
       fyhDespacho: Date;
+      fyhEstimadaEntrega: Date;
       fyhEntrega: Date;
       recorrido: RecorridoRealizadoEnvio;
     }

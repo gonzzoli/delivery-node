@@ -6,6 +6,7 @@ import {
 } from "../../../errores/clasesErrores";
 import { ESTADOS_ENVIO } from "../schema";
 import { EventoEnvio, evolucionarEnvio } from "../eventos";
+import dayjs from "dayjs";
 
 export const despacharEnvio = async (envioId: string) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -28,7 +29,9 @@ export const despacharEnvio = async (envioId: string) => {
     secuenciaEvento: 0,
     nombreEvento: "EnvioDespachado",
     contenido: {
+      distanciaADestino: envio.distanciaTotal,
       fyhDespacho: new Date(),
+      fyhEstimadaEntrega: dayjs().add(envio.duracionEstimadaViajeMins, "minutes").toDate(),
       ubicacionActual: envio.origen,
       recorrido: {
         type: "FeatureCollection",

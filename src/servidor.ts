@@ -1,3 +1,5 @@
+import { config } from "dotenv";
+config();
 import express from "express";
 import { conectarBD, desconectarBD } from "./config/bd";
 import cookieParser from "cookie-parser";
@@ -6,10 +8,8 @@ import * as swagger from "./config/docs";
 import routerBase from "./rest";
 import { logger } from "./utils/logger";
 import { manejadorErrores } from "./middlewares/manejadorErrores";
-import { config } from "dotenv";
 import { Server } from "http";
 import { conectarRabbit } from "./rabbit";
-config();
 
 process.on("uncaughtException", (error) => {
   logger.fatal(error, "Error no capturado");
@@ -17,7 +17,6 @@ process.on("uncaughtException", (error) => {
 });
 process.on("SIGINT", apagarServidor);
 process.on("SIGTERM", apagarServidor);
-process.on("SIGKILL", apagarServidor);
 
 const app = express();
 

@@ -1,7 +1,7 @@
 import { ObjectId, WithId } from "mongodb";
 import { Articulo } from "../schema";
 import { coleccionesMongo, getColeccion } from "../../../config/bd";
-import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
+import { ErrorEnvioNoPosible, ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
 import turf from "@turf/turf";
 import { ResCalcularEnvio } from "../../../rest/envios/respuestas";
 import { Point } from "geojson";
@@ -40,11 +40,27 @@ export const calcularEnvio = async (especificacionEnvio: CalcularEnvioParams) =>
       "No se encontraron articulos con los siguientes ids: " + articulosNoEncontradosIds.join(", ")
     );
 
-  const [precioPorKm, precioPorM2, precioPorKg] = await Promise.all([
-    coleccionesMongo.parametros?.findOne({ nombre: "precio_por_km" }),
-    coleccionesMongo.parametros?.findOne({ nombre: "precio_por_m2" }),
-    coleccionesMongo.parametros?.findOne({ nombre: "precio_por_kg" }),
-  ]);
+  const [precioPorKm, precioPorM2, precioPorKg, provinciaOrigen, provinciaDestino] =
+    await Promise.all([
+      coleccionesMongo.parametros?.findOne({ nombre: "precio_por_km" }),
+      coleccionesMongo.parametros?.findOne({ nombre: "precio_por_m2" }),
+      coleccionesMongo.parametros?.findOne({ nombre: "precio_por_kg" }),
+      coleccionesMongo.provincias?.findOne({
+        poligonoLimite: { $geoIntersects: { $geometry: especificacionEnvio.origenEnvio } },
+      }),
+      coleccionesMongo.provincias?.findOne({
+        poligonoLimite: { $geoIntersects: { $geometry: especificacionEnvio.destinoEnvio } },
+      }),
+    ]);
+
+  // Si no encontró la provincia, es porque esta fuera de Argentina, y el negocio
+  // no acepta envios internacionales
+  if (!provinciaOrigen || !provinciaDestino) {
+    throw new ErrorEnvioNoPosible(
+      `El ${!provinciaOrigen ? "origen" : "destino"} no está dentro del país. 
+      El negocio no realiza envios internacionales`
+    );
+  }
 
   // Distancia en linea recta, no usando rutas/calles
   const distanciaOrigenDestinoKm = turf.distance(
@@ -77,15 +93,22 @@ export const calcularEnvio = async (especificacionEnvio: CalcularEnvioParams) =>
 
   return {
     distancia: distanciaOrigenDestinoKm,
-    duracionEstimadaMins: (distanciaOrigenDestinoKm / 80) * 60, // Velocidad estimada de 80km/h
+    duracionEstimadaMins: calcularDuracionEstimadaViajeMins(distanciaOrigenDestinoKm),
     pesoTotalEnvio: detallePorArticulo.reduce(
       (pesoResultante, articulo) => pesoResultante + articulo.pesoTotalArticulos,
       0
     ),
-    precioTotal: detallePorArticulo.reduce(
-      (precioResultante, articulo) => precioResultante + articulo.precioCalculadoArticulos,
-      0
-    ),
+    precioTotal:
+      detallePorArticulo.reduce(
+        (precioResultante, articulo) => precioResultante + articulo.precioCalculadoArticulos,
+        0
+        // Si tiene que atravesar provincias el envío, se duplica el precio total (regla de negocio)
+      ) * (provinciaOrigen._id.equals(provinciaDestino._id) ? 1 : 2),
     detallePorArticulo,
   };
 };
+
+/**
+ * Velocidad estimada de 80km/h
+ */
+export const calcularDuracionEstimadaViajeMins = (distanciaKm: number) => (distanciaKm / 80) * 60;

@@ -7,7 +7,7 @@ export let conexionRabbit: amqp.Connection;
 export const conectarRabbit = async () => {
   try {
     if (!conexionRabbit) {
-      conexionRabbit = await amqp.connect("amqp://localhost:3000");
+      conexionRabbit = await amqp.connect(process.env.RABBIT_URL);
       logger.info("Conexión establecida con RabbitMQ");
     }
     return conexionRabbit;

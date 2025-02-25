@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
 import { getColeccion, coleccionesMongo } from "../../../config/bd";
 import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
@@ -45,13 +44,14 @@ export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
     secuenciaEvento: 1,
     contenido: {
       fyhAlta: new Date(),
-      fyhEstimadaEntrega: dayjs().add(envioCalculado.duracionEstimadaMins, "minutes").toDate(),
       estado: "PENDIENTE DE DESPACHO",
       _id: nuevoEnvioId.toHexString(),
       origen: orden.originAddress,
       destino: orden.destinationAddress,
       costo: envioCalculado.precioTotal,
-      codigoEnvio: Math.random().toString().slice(2, 7),
+      codigoEntrega: Math.random().toString().slice(2, 7),
+      duracionEstimadaViajeMins: envioCalculado.duracionEstimadaMins,
+      distanciaTotal: envioCalculado.distancia,
       ordenId: orden.orderId,
       usuarioCompradorId: orden.userId,
       especificacion: envioCalculado.detallePorArticulo.map((art) => ({

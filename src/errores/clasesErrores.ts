@@ -13,6 +13,7 @@ export enum CodigosError {
   RECURSO_AJENO,
   RECURSO_NO_ENCONTRADO,
   ENTIDAD_ACCION_INVALIDA,
+  ENVIO_INTERNACIONAL,
 }
 
 export class ErrorAplicacion extends Error {
@@ -158,7 +159,7 @@ export class ErrorRecursoAjeno extends ErrorAplicacion {
 }
 
 /**
- * Cuando se envian parametros que no son numeros en la parte de paginacion
+ * Cuando no se encuentra un recurso que se buscaba, y no puede seguirse con la operación.
  */
 export class ErrorRecursoNoEncontrado extends ErrorAplicacion {
   constructor(mensajeForzado?: string) {
@@ -176,6 +177,24 @@ export class ErrorRecursoNoEncontrado extends ErrorAplicacion {
 
 /**
  * Cuando se envian parametros que no son numeros en la parte de paginacion
+ */
+export class ErrorEnvioNoPosible extends ErrorAplicacion {
+  constructor(mensajeForzado?: string) {
+    super(
+      "Envio no posible",
+      CodigosHTTP.BAD_REQUEST,
+      mensajeForzado ??
+        "No es posible realizar el envío",
+      CodigosError.ENVIO_INTERNACIONAL
+    );
+    Object.setPrototypeOf(this, ErrorEnvioNoPosible.prototype);
+    this.name = "ErrorEnvioNoPosible";
+  }
+}
+
+/**
+ * Cuando se intenta realizar una accion sobre una entidad que no es aplicable
+ * en el momento por el estado actual de la entidad
  */
 export class ErrorEntidadAccionInvalida extends ErrorAplicacion {
   constructor(mensajeForzado?: string) {

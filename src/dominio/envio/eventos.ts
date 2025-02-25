@@ -9,12 +9,18 @@ type EventoEnvioCreado = EventoAplicacion<
 
 type EventoEnvioDespachado = EventoAplicacion<
   "EnvioDespachado",
-  { fyhDespacho: Date; ubicacionActual: Point; recorrido: RecorridoRealizadoEnvio }
+  {
+    fyhDespacho: Date;
+    fyhEstimadaEntrega: Date;
+    ubicacionActual: Point;
+    recorrido: RecorridoRealizadoEnvio;
+    distanciaADestino: number;
+  }
 >;
 
 type EventoEnvioUbicacionActualizada = EventoAplicacion<
   "EnvioUbicacionActualizada",
-  { fyhUbicacion: Date; ubicacion: Point }
+  { fyhUbicacion: Date; ubicacion: Point; fyhEstimadaEntrega: Date; distanciaADestino: number }
 >;
 
 type EventoEnvioEntregado = EventoAplicacion<"EnvioEntregado", { fyhEntrega: Date }>;
