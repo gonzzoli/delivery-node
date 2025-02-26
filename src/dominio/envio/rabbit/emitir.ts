@@ -1,6 +1,6 @@
 import { Point } from "geojson";
-import { DELIVERY_EXCHANGE, fabricaEmitirMensajeExchangeRabbit } from ".";
-import { Envio } from "../dominio/envio/schema";
+import { Envio } from "../schema";
+import { DELIVERY_EXCHANGE, fabricaEmitirMensajeExchangeRabbit } from "../../../config/rabbit";
 
 export const emitirEnvioCreado = fabricaEmitirMensajeExchangeRabbit<Envio>(
   DELIVERY_EXCHANGE,

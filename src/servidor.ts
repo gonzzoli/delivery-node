@@ -9,7 +9,7 @@ import routerBase from "./rest";
 import { logger } from "./utils/logger";
 import { manejadorErrores } from "./middlewares/manejadorErrores";
 import { Server } from "http";
-import { conectarRabbit } from "./rabbit";
+import { conectarRabbit } from "./config/rabbit";
 
 process.on("uncaughtException", (error) => {
   logger.fatal(error, "Error no capturado");
@@ -44,12 +44,14 @@ void (async () => {
   try {
     await conectarBD();
     await conectarRabbit();
+    import("./dominio/envio/rabbit/consumir.js");
+    import("./dominio/usuario/rabbit/consumir.js");
     servidor = app.listen(PUERTO_SERVIDOR);
     logger.info("Base de datos conectada y servidor iniciado en puerto " + PUERTO_SERVIDOR);
   } catch (error: unknown) {
     logger.error(
       error,
-      "No pudo conectarse a la base de datos. 5 intentos fallidos, debera revisarse manualmente el problema."
+      "Ocurrió un error en la inicialización del servidor. Debera revisarse manualmente el problema."
     );
   }
 })();

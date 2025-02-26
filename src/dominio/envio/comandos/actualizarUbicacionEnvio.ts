@@ -10,7 +10,7 @@ import { Point } from "geojson";
 import turf from "@turf/turf";
 import { calcularDuracionEstimadaViajeMins } from "../queries/calcularEnvio";
 import dayjs from "dayjs";
-import { emitirEnvioCercanoADestino } from "../../../rabbit/emitir";
+import { emitirEnvioCercanoADestino } from "../rabbit/emitir";
 
 export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: Point) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({

@@ -6,7 +6,7 @@ import type { EventoEnvio } from "../eventos";
 import QueriesEnvio from "../queries";
 import { CarritoId, OrdenId } from "../schema";
 import { Point } from "geojson";
-import { emitirEnvioCreado } from "../../../rabbit/emitir";
+import { emitirEnvioCreado } from "../rabbit/emitir";
 
 export type OrderPlacedData = {
   orderId: OrdenId;

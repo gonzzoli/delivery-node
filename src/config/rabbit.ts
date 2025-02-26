@@ -30,6 +30,7 @@ export const TIPOS_EXCHANGE = {
   TOPIC: "topic",
   HEADERS: "headers",
 } as const;
+export const DELIVERY_EXCHANGE = "exchange_delivery";
 
 export const fabricaEmitirMensajeExchangeRabbit =
   <T>(
@@ -40,34 +41,30 @@ export const fabricaEmitirMensajeExchangeRabbit =
   async (mensaje: T) => {
     const conexion = await conectarRabbit();
     const canal = await conexion.createChannel();
-    await canal.assertExchange(exchange, tipoExchange, { durable: true });
+    await canal.assertExchange(exchange, tipoExchange);
     canal.publish(DELIVERY_EXCHANGE, routingKey, Buffer.from(JSON.stringify(mensaje)));
   };
 
-export const fabricaConsumirMensajeExchangeRabbit =
-  <T>(
-    exchange: string,
-    tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
-    routingKey: string,
-    callback: (mensaje: T) => Promise<void>
-  ) =>
-  async () => {
-    const conexion = await conectarRabbit();
-    const canal = await conexion.createChannel();
-
-    await canal.assertExchange(exchange, tipoExchange, { durable: true });
-    const { queue } = await canal.assertQueue("", { exclusive: true });
-    await canal.bindQueue(queue, exchange, routingKey);
-    await canal.consume(
-      queue,
-      async (mensaje) => {
-        if (mensaje) {
-          await callback(JSON.parse(mensaje.content.toString()) as T);
-          canal.ack(mensaje);
-        }
-      },
-      { noAck: false }
-    );
-  };
-
-export const DELIVERY_EXCHANGE = "delivery_exchange";
+export const fabricaConsumirMensajeExchangeRabbit = async <T>(
+  exchange: string,
+  tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
+  opcionesExchange: amqp.Options.AssertExchange,
+  routingKey: string,
+  callback: (mensaje: T) => Promise<void>
+) => {
+  const conexion = await conectarRabbit();
+  const canal = await conexion.createChannel();
+  await canal.assertExchange(exchange, tipoExchange, opcionesExchange);
+  const { queue } = await canal.assertQueue("", { exclusive: true });
+  await canal.bindQueue(queue, exchange, routingKey);
+  await canal.consume(
+    queue,
+    async (mensaje) => {
+      if (mensaje) {
+        await callback(JSON.parse(mensaje.content.toString()) as T);
+        canal.ack(mensaje);
+      }
+    },
+    { noAck: false }
+  );
+};
