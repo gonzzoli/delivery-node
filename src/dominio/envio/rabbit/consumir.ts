@@ -4,8 +4,9 @@ import { OrderPlacedData, crearEnvioDesdeOrden } from "../comandos/crearEnvioDes
 void fabricaConsumirMensajeExchangeRabbit<OrderPlacedData>(
   "order_placed",
   TIPOS_EXCHANGE.FANOUT,
-  { durable: false },
+  "delivery_order_placed",
   "",
+  { durable: false },
   // Si no tuviese que enviar ack en rabbit no haria falta que esto sea async await
   async (mensaje) => {
     await crearEnvioDesdeOrden(mensaje);

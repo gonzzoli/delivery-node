@@ -48,21 +48,31 @@ export const fabricaEmitirMensajeExchangeRabbit =
 export const fabricaConsumirMensajeExchangeRabbit = async <T>(
   exchange: string,
   tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
-  opcionesExchange: amqp.Options.AssertExchange,
+  nombreQueue = "",
   routingKey: string,
+  opcionesExchange: amqp.Options.AssertExchange,
   callback: (mensaje: T) => Promise<void>
 ) => {
   const conexion = await conectarRabbit();
   const canal = await conexion.createChannel();
   await canal.assertExchange(exchange, tipoExchange, opcionesExchange);
-  const { queue } = await canal.assertQueue("", { exclusive: true });
+  const { queue } = await canal.assertQueue(nombreQueue);
   await canal.bindQueue(queue, exchange, routingKey);
   await canal.consume(
     queue,
     async (mensaje) => {
+      console.log("EXCHANGE: ", exchange)
+      console.log("QUEUE: ", queue)
+      console.log("MENSAJE RECIBIDO: ", mensaje)
       if (mensaje) {
-        await callback(JSON.parse(mensaje.content.toString()) as T);
-        canal.ack(mensaje);
+        try {
+          await callback(JSON.parse(mensaje.content.toString()) as T);
+          canal.ack(mensaje);
+        } catch (error) {
+          if (error instanceof SyntaxError)
+            logger.error(error, "Error en el formato JSON del mensaje");
+          else throw error;
+        }
       }
     },
     { noAck: false }

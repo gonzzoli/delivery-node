@@ -1,12 +1,14 @@
 import { fabricaConsumirMensajeExchangeRabbit, TIPOS_EXCHANGE } from "../../../config/rabbit";
-import { OrderPlacedData, crearEnvioDesdeOrden } from "../../envio/comandos/crearEnvioDesdeOrden";
+import { registrarUsuario } from "../comandos";
+import { Usuario } from "../schema";
 
-void fabricaConsumirMensajeExchangeRabbit<OrderPlacedData>(
+void fabricaConsumirMensajeExchangeRabbit<Usuario>(
   "user_registered",
   TIPOS_EXCHANGE.FANOUT,
-  { durable: true },
+  "delivery_user_registered",
   "",
+  { durable: true },
   async (mensaje) => {
-    await crearEnvioDesdeOrden(mensaje);
+    await registrarUsuario(mensaje);
   }
 );

@@ -3,7 +3,7 @@ import { coleccionesMongo, getColeccion } from "../../../config/bd";
 import { Usuario } from "../schema";
 import { ErrorConflictoRecursoExistente } from "../../../errores/clasesErrores";
 
-export const registrarUsuario = async (usuario: Omit<Usuario, "provinciaId">) => {
+export const registrarUsuario = async (usuario: Usuario) => {
   const usuarioExistente = await getColeccion(coleccionesMongo.usuarios).findOne({
     _id: new ObjectId(usuario.usuarioId),
   });

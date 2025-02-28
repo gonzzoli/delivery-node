@@ -8,6 +8,11 @@ services:
       - "5672:5672"
     networks:
       - microservicios-net
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 20s
+      retries: 5
 
   mongodb:
     image: mongo:4.0.18-xenial
@@ -95,9 +100,12 @@ services:
     networks:
       - microservicios-net
     depends_on:
-      - mongodb
-      - redis
-      - rabbit
+      mongodb:
+        condition: service_started
+      redis:
+        condition: service_started
+      rabbit:
+        condition: service_healthy
 
   api-cli:
     image: prod-api-cli
