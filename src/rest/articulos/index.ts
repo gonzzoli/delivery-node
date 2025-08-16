@@ -1,10 +1,16 @@
 import { Router } from "express";
-import { registrarArticulo } from "./controladores/registrarArticulo";
-import { validarRequest } from "../../middlewares/midValidarRequest";
-import { schemaRegistrarArticuloDTO } from "./dto";
+import { modificarArticulo } from "./controladores/modificarArticulo";
+import { validarRequest } from "../../middlewares/validarRequest";
+import { schemaModificarArticuloDTO } from "./dto";
+import { validarUsuario } from "../../middlewares/validarUsuario";
 
 const router = Router();
 
-router.post("/:articuloId", validarRequest(schemaRegistrarArticuloDTO), registrarArticulo);
+router.patch(
+  "/:articuloId",
+  validarUsuario,
+  validarRequest(schemaModificarArticuloDTO),
+  modificarArticulo
+);
 
 export default router;

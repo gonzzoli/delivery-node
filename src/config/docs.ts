@@ -19,13 +19,8 @@ export const documentacionAPI = new OpenAPIRegistry();
 const opcionesDocs: OpenAPIObjectConfigV31 = {
   openapi: "3.1.0",
   info: {
-    title: "Isell Market API Docs",
+    title: "Delivery Node API Docs",
     version,
-    contact: {
-      // ni hace falta contacto si esto va a ser interno para nosotros, pero bueno
-      name: "Isell Market",
-      email: "emaildeisell@gmail.com",
-    },
   },
   // url base que se prefija a las rutas que usemos en las definiciones de los endpoints
   servers: [{ url: "http://localhost:3001/api" }],

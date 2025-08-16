@@ -1,7 +1,5 @@
 import { ObjectId } from "mongodb";
 import { getColeccion, coleccionesMongo } from "../../../config/bd";
-import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
-import { Usuario } from "../../usuario/schema";
 import type { EventoEnvio } from "../eventos";
 import QueriesEnvio from "../queries";
 import { CarritoId, OrdenId } from "../schema";
@@ -11,23 +9,12 @@ import { emitirEnvioCreado } from "../rabbit/emitir";
 export type OrderPlacedData = {
   orderId: OrdenId;
   cartId: CarritoId;
-  userId: Usuario["usuarioId"];
+  userId: string;
   originAddress: Point;
   destinationAddress: Point;
   articles: { articleId: string; quantity: number }[];
 };
 export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
-  const articulosIds = orden.articles.map((a) => new ObjectId(a.articleId));
-  const articulosOrden = await getColeccion(coleccionesMongo.articulos)
-    .find({ _id: { $in: articulosIds } })
-    .toArray();
-
-  if (articulosOrden.length !== articulosIds.length) {
-    throw new ErrorRecursoNoEncontrado(
-      "No disponemos de las dimensiones/peso de alguno de los articulos. No es posible generar el envío."
-    );
-  }
-
   const envioCalculado = await QueriesEnvio.calcularEnvio({
     origenEnvio: orden.originAddress,
     destinoEnvio: orden.destinationAddress,
@@ -36,8 +23,9 @@ export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
       cantidad: a.quantity,
     })),
   });
+
   const nuevoEnvioId = new ObjectId();
-  const eventoEnvioCreado: EventoEnvio = {
+  const eventoEnvioCreado: EventoEnvio & {nombreEvento: "EnvioCreado"} = {
     nombreEvento: "EnvioCreado",
     agregadoId: nuevoEnvioId.toHexString(),
     fyhEvento: new Date(),
@@ -49,7 +37,6 @@ export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
       origen: orden.originAddress,
       destino: orden.destinationAddress,
       costo: envioCalculado.precioTotal,
-      codigoEntrega: Math.random().toString().slice(2, 7),
       duracionEstimadaViajeMins: envioCalculado.duracionEstimadaMins,
       distanciaTotal: envioCalculado.distancia,
       ordenId: orden.orderId,

@@ -1,7 +1,8 @@
 // con esto podemos agregar el objeto datosValidados al objeto req
 // en nuestras rutas. Ese atributo debe ser siempre asignado en el middleware validarRequest
 
-import { Usuario } from "../../../contextos/usuarios/entidades";
+import { Usuario } from "../../dominio/usuario/schema";
+
 
 // y tendra los datos definidos en el schema Zod pasado como parametro
 declare global {
@@ -12,7 +13,7 @@ declare global {
       datosValidados?: Record<string, unknown>;
 
       // campo agregado al usar middleware validarUsuario
-      usuario?: Usuario;
+      usuarioId?: Usuario["usuarioId"];
     }
   }
   namespace NodeJS {

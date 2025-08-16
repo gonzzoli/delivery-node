@@ -1,21 +1,10 @@
 import z from "zod";
-import { ExtraerRestDTO, numberZod, stringZod } from "../../utils/zodUtils";
-
-export const schemaPunto = z
-  .number()
-  .array()
-  .length(2)
-  .transform((punto) => punto as [number, number]);
-
-const schemaPuntoDTO = z.object({
-  type: z.literal("Point"),
-  coordinates: schemaPunto,
-});
+import { ExtraerRestDTO, numberZod, schemaPuntoGeoJSONDTO, stringZod } from "../../utils/zodUtils";
 
 export const schemaCalcularEnvioDTO = z.object({
   body: z.object({
-    origenEnvio: schemaPuntoDTO,
-    destinoEnvio: schemaPuntoDTO,
+    origenEnvio: schemaPuntoGeoJSONDTO,
+    destinoEnvio: schemaPuntoGeoJSONDTO,
     articulos: z
       .object({
         articuloId: stringZod("id del articulo"),
@@ -31,7 +20,7 @@ export type CalcularEnvioDTO = ExtraerRestDTO<typeof schemaCalcularEnvioDTO>;
 export const schemaActualizarUbicacionEnvioDTO = z.object({
   params: z.object({ envioId: stringZod("id del envio") }),
   body: z.object({
-    coordenadas: schemaPuntoDTO,
+    coordenadas: schemaPuntoGeoJSONDTO,
   }),
 });
 

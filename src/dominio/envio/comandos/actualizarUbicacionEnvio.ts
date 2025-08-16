@@ -51,6 +51,7 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
     agregadoEvolucionado,
     { returnDocument: "after" }
   );
+  // Regla de negocio, posiblemente para un servicio de notificaciones
   if (distanciaADestino <= 100)
     void emitirEnvioCercanoADestino({
       envioId: envio._id.toHexString(),

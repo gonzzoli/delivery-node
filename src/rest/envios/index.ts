@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { tryCatchControlador } from "../../errores/tryCatch";
-import { validarRequest } from "../../middlewares/midValidarRequest";
+import { validarRequest } from "../../middlewares/validarRequest";
 import { schemaActualizarUbicacionEnvioDTO } from "./dto";
 import { buscarEnvios } from "./controladores/buscarEnvios";
 import { buscarEnvio } from "./controladores/buscarEnvio";

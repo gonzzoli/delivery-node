@@ -62,8 +62,7 @@ Las dimensiones y peso de los articulos se mantendrán en este microservicio.
 ## Iniciar envío
 **Precondición:** envío en estado "PENDIENTE DE DESPACHO"
 **Camino normal**
-- Se genera el evento "EventoEnvioDespachado" que contiene la hora de inicio del envío, la hora estimada de llegada (en base a la duración de envío calculada cuando se generó). Se almacena y se emite.
-- Se genera seguidamente un evento de "EventoEnvioUbicacionActualizada" para mantener registro del recorrido desde el punto de origen. Se almacena y se emite.
+- Se genera el evento "EventoEnvioDespachado" que contiene la hora de inicio del envío, la hora estimada de llegada (en base a la duración de envío calculada cuando se generó), el punto inicial del recorrido (origen). Se almacena y se emite.
 - Actualiza la proyección del envío, quedando en estado "EN CAMINO"
 
 ## Registrar entrega de orden
@@ -141,7 +140,7 @@ type Provincia = {
 type Usuario = {
   usuarioId: UsuarioId;
   nombre: string;
-  coordenadas: Punto;
+  ubicacion: Punto;
   provincia: Omit<Provincia, "polilineaLimite">;
 };
 
@@ -164,7 +163,7 @@ type EspecificacionEnvio = Articulo & {
 type RecorridoRealizadoEnvio = (Punto & { fyhUbicacion: Date })[];
 type Envio = {
   envioId: Etiquetado<EntidadId, "EnvioId">;
-  codigoEnvio: string;
+  codigoEntrega: string;
   ordenId: OrdenId;
   usuarioCompradorId: UsuarioId;
   origen: Punto; // Indicado en el mensaje de order_placed
@@ -333,7 +332,7 @@ type EnvioCreado = Envio;
 // Routing key: envio.despachado
 type EnvioDespachado = {
   envioId: EnvioId;
-  codigoRecepcionCliente: number;
+  codigoEntrega: number;
 }
 
 // Routing key: envio.ubicacion_actualizada

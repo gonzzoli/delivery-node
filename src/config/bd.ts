@@ -17,8 +17,13 @@ type ColeccionesBD = {
 export const coleccionesMongo: ColeccionesBD = {};
 export const cliente = new MongoClient(process.env.MONGO_CONN_STRING);
 
+/**
+ * Conecta con mongoDB e instancia las colecciones dentro del objeto coleccionesMongo que debe
+ * reutilizarse en el proyecto cada vez que quiera accederse a las colecciones.
+ */
 export async function conectarBD() {
   try {
+    logger.info("Conectando a la base de datos...");
     await cliente.connect();
     const db = cliente.db(process.env.MONGO_DB_NAME);
     coleccionesMongo.envios = db.collection("envios");

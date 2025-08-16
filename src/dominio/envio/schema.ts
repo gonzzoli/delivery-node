@@ -1,11 +1,9 @@
 import { FeatureCollection, Point, Polygon } from "geojson";
 import { EntidadId } from "../../utils/entidadId";
 import { Etiquetado } from "../../utils/Etiquetado";
-import { Usuario } from "../usuario/schema";
 
 // Definición de Ids
 export type OrdenId = Etiquetado<EntidadId, "OrdenId">;
-
 export type CarritoId = Etiquetado<EntidadId, "CarritoId">;
 
 export type Parametro = {
@@ -41,9 +39,8 @@ export type EspecificacionArticuloEnvio = Articulo & {
 // Todos los puntos que ha registrado en cada actualizacion de ubicacion
 export type RecorridoRealizadoEnvio = FeatureCollection<Point, { fyhUbicacion: Date }>;
 export type Envio = {
-  codigoEntrega: string;
   ordenId: OrdenId;
-  usuarioCompradorId: Usuario["usuarioId"];
+  usuarioCompradorId: string;
   origen: Point; // Indicado en el mensaje de order_placed
   destino: Point; // Extraido del usuario comprador
   duracionEstimadaViajeMins: number;
@@ -57,6 +54,7 @@ export type Envio = {
     }
   | {
       estado: typeof ESTADOS_ENVIO.EN_CAMINO;
+      codigoEntrega: string;
       fyhEstimadaEntrega: Date;
       distanciaADestino: number;
       fyhDespacho: Date;

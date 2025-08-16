@@ -1,8 +1,9 @@
 import { fabricaConsumirMensajeExchangeRabbit, TIPOS_EXCHANGE } from "../../../config/rabbit";
-import { registrarUsuario } from "../comandos";
-import { Usuario } from "../schema";
+import { registrarUsuario } from "../comandos/registrarUsuario";
 
-void fabricaConsumirMensajeExchangeRabbit<Usuario>(
+// Esto no lo emite realmente auth, asi que debe simularse desde el panel de rabbit. Solo envia
+// usuarioId porque la ubicacion es algo que maneja este microservicio. Recibe el userID
+void fabricaConsumirMensajeExchangeRabbit<string>(
   "user_registered",
   TIPOS_EXCHANGE.FANOUT,
   "delivery_user_registered",

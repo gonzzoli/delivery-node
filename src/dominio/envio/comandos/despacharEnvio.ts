@@ -7,6 +7,7 @@ import {
 import { ESTADOS_ENVIO } from "../schema";
 import { EventoEnvio, evolucionarEnvio } from "../eventos";
 import dayjs from "dayjs";
+import { emitirEnvioDespachado } from "../rabbit/emitir";
 
 export const despacharEnvio = async (envioId: string) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -29,6 +30,7 @@ export const despacharEnvio = async (envioId: string) => {
     secuenciaEvento: 0,
     nombreEvento: "EnvioDespachado",
     contenido: {
+      codigoEntrega: Math.random().toString().slice(2, 7),
       distanciaADestino: envio.distanciaTotal,
       fyhDespacho: new Date(),
       fyhEstimadaEntrega: dayjs().add(envio.duracionEstimadaViajeMins, "minutes").toDate(),
@@ -47,11 +49,14 @@ export const despacharEnvio = async (envioId: string) => {
   };
   const agregadoEvolucionado = evolucionarEnvio([eventoEnvioDespachado], envio);
 
+  // Se guarda el evento
   await getColeccion(coleccionesMongo.eventosEnvios).insertOne(eventoEnvioDespachado);
+  // Se actualiza la proyeccion del envio
   const envioDespachado = await getColeccion(coleccionesMongo.envios).findOneAndUpdate(
     { _id: envio._id },
     agregadoEvolucionado,
     { returnDocument: "after" }
-  );
+  )!;
+  void emitirEnvioDespachado({ envioId: envio._id.toHexString() });
   return envioDespachado;
 };

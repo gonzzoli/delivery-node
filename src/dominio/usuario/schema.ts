@@ -1,11 +1,7 @@
 import { Point } from "geojson";
-import type { EntidadId } from "../../utils/entidadId";
-import type { Etiquetado } from "../../utils/Etiquetado";
-
-type UsuarioId = Etiquetado<EntidadId, "UsuarioId">;
+import { Provincia } from "../envio/schema";
 
 export type Usuario = {
-  usuarioId: UsuarioId;
-  nombre: string;
-  coordenadas: Point;
+  ubicacion: Point | null;
+  provincia: Provincia["nombre"] | null;
 };

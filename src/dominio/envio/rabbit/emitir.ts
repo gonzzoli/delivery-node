@@ -10,7 +10,6 @@ export const emitirEnvioCreado = fabricaEmitirMensajeExchangeRabbit<Envio>(
 
 export const emitirEnvioDespachado = fabricaEmitirMensajeExchangeRabbit<{
   envioId: string;
-  codigoRecepcionCliente: number;
 }>(DELIVERY_EXCHANGE, "direct", "envio.despachado");
 
 export const emitirEnvioUbicacionActualizada = fabricaEmitirMensajeExchangeRabbit<{

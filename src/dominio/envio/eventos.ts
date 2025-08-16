@@ -13,6 +13,7 @@ type EventoEnvioDespachado = EventoAplicacion<
     fyhDespacho: Date;
     fyhEstimadaEntrega: Date;
     ubicacionActual: Point;
+    codigoEntrega: string;
     recorrido: RecorridoRealizadoEnvio;
     distanciaADestino: number;
   }

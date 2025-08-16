@@ -7,6 +7,17 @@ export type RestDTO = z.ZodObject<{
   headers?: z.AnyZodObject;
 }>;
 
+export const schemaPunto = z
+  .number()
+  .array()
+  .length(2)
+  .transform((punto) => punto as [number, number]);
+
+export const schemaPuntoGeoJSONDTO = z.object({
+  type: z.literal("Point"),
+  coordinates: schemaPunto,
+});
+
 export const numberZod = (nombreCampo: string) =>
   z.coerce.number({
     required_error: `El campo ${nombreCampo} es requerido.`,

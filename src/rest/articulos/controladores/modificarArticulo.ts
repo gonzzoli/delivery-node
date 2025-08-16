@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { CodigosHTTP } from "../../../utils/codigosHTTP";
-import { RegistrarArticuloDTO } from "../dto";
 import { coleccionesMongo, getColeccion } from "../../../config/bd";
 import { Articulo } from "../../../dominio/envio/schema";
 import axios from "axios";
 import { ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
 import { ObjectId } from "mongodb";
+import { ModificarArticuloDTO } from "../dto";
 
-export const registrarArticulo = async (req: Request, res: Response) => {
-  const dto = req.datosValidados as RegistrarArticuloDTO;
+export const modificarArticulo = async (req: Request, res: Response) => {
+  const dto = req.datosValidados as ModificarArticuloDTO;
 
   const articuloExistente = await coleccionesMongo.articulos?.findOne({
     _id: new ObjectId(dto.articuloId),
@@ -28,8 +28,8 @@ export const registrarArticulo = async (req: Request, res: Response) => {
   res.status(CodigosHTTP.ACCEPTED).send(articuloActualizado);
 };
 
-type CatalogResBuscarArticuloPorId = {
-  _id: ObjectId;
+type ResCatalogBuscarArticuloPorId = {
+  _id: string;
   name: string;
   description: string;
   image: string;
@@ -37,21 +37,19 @@ type CatalogResBuscarArticuloPorId = {
   stock: number;
   enabled: boolean;
 };
-const buscarYGuardarArticuloCatalog = async (articuloDTO: RegistrarArticuloDTO) => {
-  const { data: articuloCatalog } = await axios.get<CatalogResBuscarArticuloPorId>(
-    `${process.env.CATALOG_API_BASE_URL}/articles/${articuloDTO.articuloId}`
+const buscarYGuardarArticuloCatalog = async (dto: ModificarArticuloDTO) => {
+  const { data: articuloCatalog } = await axios.get<ResCatalogBuscarArticuloPorId>(
+    `${process.env.CATALOG_API_BASE_URL}/articles/${dto.articuloId}`
   );
   if (!articuloCatalog)
-    throw new ErrorRecursoNoEncontrado(
-      "No se encontró el articulo con id: " + articuloDTO.articuloId
-    );
+    throw new ErrorRecursoNoEncontrado("No se encontró el articulo con id: " + dto.articuloId);
 
   const { insertedId } = await getColeccion(coleccionesMongo.articulos).insertOne({
-    _id: articuloCatalog._id,
+    _id: new ObjectId(articuloCatalog._id),
     nombre: articuloCatalog.name,
-    peso: articuloDTO.peso,
-    largo: articuloDTO.largo,
-    ancho: articuloDTO.ancho,
+    peso: dto.peso,
+    largo: dto.largo,
+    ancho: dto.ancho,
   });
 
   const articuloInsertado = await getColeccion(coleccionesMongo.articulos).findOne({

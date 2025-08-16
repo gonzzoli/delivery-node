@@ -44,6 +44,8 @@ void (async () => {
   try {
     await conectarBD();
     await conectarRabbit();
+    // Se importan para que se ejecuten, y asi ya tener instanciados los Exchange de consumo
+    // y las funciones que los consumen.
     import("./dominio/envio/rabbit/consumir.js");
     import("./dominio/usuario/rabbit/consumir.js");
     servidor = app.listen(PUERTO_SERVIDOR);

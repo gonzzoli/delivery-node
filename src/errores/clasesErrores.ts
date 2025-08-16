@@ -71,7 +71,7 @@ export class ErrorConexionRabbit extends ErrorAplicacion {
 }
 
 /**
- * Cuando no hay JWT
+ * Cuando no hay JWT o no es valido
  */
 export class ErrorAutenticacion extends ErrorAplicacion {
   constructor(mensajeForzado?: string) {
