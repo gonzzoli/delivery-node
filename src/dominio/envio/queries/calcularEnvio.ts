@@ -2,7 +2,7 @@ import { ObjectId, WithId } from "mongodb";
 import { Articulo } from "../schema";
 import { coleccionesMongo, getColeccion } from "../../../config/bd";
 import { ErrorEnvioNoPosible, ErrorRecursoNoEncontrado } from "../../../errores/clasesErrores";
-import turf from "@turf/turf";
+import * as turf from "@turf/turf";
 import { ResCalcularEnvio } from "../../../rest/envios/respuestas";
 import { Point } from "geojson";
 

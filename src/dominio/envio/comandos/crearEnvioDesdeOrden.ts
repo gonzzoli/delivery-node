@@ -7,14 +7,21 @@ import { Point } from "geojson";
 import { emitirEnvioCreado } from "../rabbit/emitir";
 
 export type OrderPlacedData = {
-  orderId: OrdenId;
-  cartId: CarritoId;
-  userId: string;
-  originAddress: Point;
-  destinationAddress: Point;
-  articles: { articleId: string; quantity: number }[];
+  correlation_id: string;
+  exchange: string;
+  routing_key: string;
+  message: {
+    orderId: OrdenId;
+    cartId: CarritoId;
+    userId: string;
+    originAddress: Point;
+    destinationAddress: Point;
+    articles: { articleId: string; quantity: number }[];
+  };
 };
-export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
+
+export const crearEnvioDesdeOrden = async ({ message: orden }: OrderPlacedData) => {
+  console.log("ORDEN PUESTA", orden);
   const envioCalculado = await QueriesEnvio.calcularEnvio({
     origenEnvio: orden.originAddress,
     destinoEnvio: orden.destinationAddress,
@@ -25,7 +32,7 @@ export const crearEnvioDesdeOrden = async (orden: OrderPlacedData) => {
   });
 
   const nuevoEnvioId = new ObjectId();
-  const eventoEnvioCreado: EventoEnvio & {nombreEvento: "EnvioCreado"} = {
+  const eventoEnvioCreado: EventoEnvio & { nombreEvento: "EnvioCreado" } = {
     nombreEvento: "EnvioCreado",
     agregadoId: nuevoEnvioId.toHexString(),
     fyhEvento: new Date(),

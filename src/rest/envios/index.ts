@@ -8,6 +8,7 @@ import { calcularEnvio } from "./controladores/calcularEnvio";
 import { actualizarUbicacionEnvio } from "./controladores/actualizarUbicacionEnvio";
 import { despacharEnvio } from "./controladores/despacharEnvio";
 import { entregarEnvio } from "./controladores/entregarEnvio";
+import { paramsZod, stringZod } from "../../utils/zodUtils";
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.post(
   validarRequest(schemaActualizarUbicacionEnvioDTO),
   tryCatchControlador(actualizarUbicacionEnvio)
 );
-router.post("/:envioId/despachar", tryCatchControlador(despacharEnvio));
-router.post("/:envioId/entregar", tryCatchControlador(entregarEnvio));
+router.post("/:envioId/despachar", validarRequest(paramsZod({envioId: stringZod("id del envio")})), tryCatchControlador(despacharEnvio));
+router.post("/:envioId/entregar", validarRequest(paramsZod({envioId: stringZod("id del envio")})), tryCatchControlador(entregarEnvio));
 
 export default router;

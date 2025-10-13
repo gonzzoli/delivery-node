@@ -1,6 +1,6 @@
 import amqp from "amqplib";
 import { logger } from "../utils/logger";
-import { ErrorConexionRabbit } from "../errores/clasesErrores";
+import { ErrorAplicacion, ErrorConexionRabbit } from "../errores/clasesErrores";
 
 export let conexionRabbit: amqp.Connection;
 
@@ -74,15 +74,38 @@ export const fabricaConsumirMensajeExchangeRabbit = async <T>(
     async (mensaje) => {
       console.log("EXCHANGE: ", exchange);
       console.log("QUEUE: ", queue);
-      console.log("MENSAJE RECIBIDO: ", mensaje);
       if (mensaje) {
         try {
+          console.log("MENSAJE RECIBIDO json: ", JSON.parse(mensaje.content.toString()));
           await callback(JSON.parse(mensaje.content.toString()) as T);
           canal.ack(mensaje);
         } catch (error) {
           if (error instanceof SyntaxError)
             logger.error(error, "Error en el formato JSON del mensaje");
-          else throw error;
+          // Los errores de rabbit no tienen un manejador global, asi que los atrapamos
+          // aca y solo logeamos sus datos
+          else if (error instanceof ErrorAplicacion) {
+            // intentamos parsear el objeto del mensaje
+            let contenidoMensaje: unknown = null;
+            try {
+              contenidoMensaje = JSON.parse(mensaje.content.toString());
+            } catch (error) {
+              //no hacemos nada
+            }
+            logger.error(
+              {
+                error: {
+                  name: error.name,
+                  message: error.message,
+                  codigoIdentificacion: error.codigoIdentificacion,
+                },
+                contexto: { exchange, queue, routingKey, contenidoMensaje },
+              },
+              "Error consumiendo Rabbit"
+            );
+          } else {
+            logger.error(error, "Error consumiendo el mensaje");
+          }
         }
       }
     },

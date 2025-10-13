@@ -7,7 +7,7 @@ import {
 } from "../../../errores/clasesErrores";
 import { EventoEnvio, evolucionarEnvio } from "../eventos";
 import { Point } from "geojson";
-import turf from "@turf/turf";
+import * as turf from "@turf/turf";
 import { calcularDuracionEstimadaViajeMins } from "../queries/calcularEnvio";
 import dayjs from "dayjs";
 import { emitirEnvioCercanoADestino } from "../rabbit/emitir";
@@ -36,7 +36,7 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
     nombreEvento: "EnvioUbicacionActualizada",
     contenido: {
       fyhUbicacion: new Date(),
-      ubicacion: nuevaUbicacion,
+      ubicacionActual: nuevaUbicacion,
       distanciaADestino,
       fyhEstimadaEntrega: dayjs()
         .add(calcularDuracionEstimadaViajeMins(distanciaADestino), "days")
@@ -48,7 +48,7 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
   await getColeccion(coleccionesMongo.eventosEnvios).insertOne(eventoUbicacionActualizada);
   const envioActualizado = await getColeccion(coleccionesMongo.envios).findOneAndUpdate(
     { _id: envio._id },
-    agregadoEvolucionado,
+    { $set: agregadoEvolucionado },
     { returnDocument: "after" }
   );
   // Regla de negocio, posiblemente para un servicio de notificaciones

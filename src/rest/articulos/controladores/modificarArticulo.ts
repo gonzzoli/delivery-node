@@ -15,7 +15,8 @@ export const modificarArticulo = async (req: Request, res: Response) => {
   });
 
   let articuloActualizado: Articulo;
-  if (!articuloExistente) articuloActualizado = await buscarYGuardarArticuloCatalog(dto);
+  if (!articuloExistente)
+    articuloActualizado = await buscarYGuardarArticuloCatalog(dto, req.headers.authorization!);
   else
     articuloActualizado = (await getColeccion(coleccionesMongo.articulos).findOneAndUpdate(
       {
@@ -37,9 +38,14 @@ type ResCatalogBuscarArticuloPorId = {
   stock: number;
   enabled: boolean;
 };
-const buscarYGuardarArticuloCatalog = async (dto: ModificarArticuloDTO) => {
+const buscarYGuardarArticuloCatalog = async (dto: ModificarArticuloDTO, tokenJWT: string) => {
   const { data: articuloCatalog } = await axios.get<ResCatalogBuscarArticuloPorId>(
-    `${process.env.CATALOG_API_BASE_URL}/articles/${dto.articuloId}`
+    `${process.env.CATALOG_API_BASE_URL}/articles/${dto.articuloId}`,
+    {
+      headers: {
+        Authorization: tokenJWT,
+      },
+    }
   );
   if (!articuloCatalog)
     throw new ErrorRecursoNoEncontrado("No se encontró el articulo con id: " + dto.articuloId);

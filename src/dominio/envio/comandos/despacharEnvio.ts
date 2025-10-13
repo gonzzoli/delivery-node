@@ -54,7 +54,7 @@ export const despacharEnvio = async (envioId: string) => {
   // Se actualiza la proyeccion del envio
   const envioDespachado = await getColeccion(coleccionesMongo.envios).findOneAndUpdate(
     { _id: envio._id },
-    agregadoEvolucionado,
+    { $set: agregadoEvolucionado },
     { returnDocument: "after" }
   )!;
   void emitirEnvioDespachado({ envioId: envio._id.toHexString() });

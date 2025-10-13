@@ -27,6 +27,7 @@ export class ErrorAplicacion extends Error {
     descripcion: string,
     codigoIdentificacion: number
   ) {
+    console.log("ERROR DESCRIP", descripcion);
     super(descripcion);
     Object.setPrototypeOf(this, new.target.prototype);
 
@@ -183,8 +184,7 @@ export class ErrorEnvioNoPosible extends ErrorAplicacion {
     super(
       "Envio no posible",
       CodigosHTTP.BAD_REQUEST,
-      mensajeForzado ??
-        "No es posible realizar el envío",
+      mensajeForzado ?? "No es posible realizar el envío",
       CodigosError.ENVIO_INTERNACIONAL
     );
     Object.setPrototypeOf(this, ErrorEnvioNoPosible.prototype);

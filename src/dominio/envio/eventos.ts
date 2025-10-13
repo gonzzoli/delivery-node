@@ -21,7 +21,12 @@ type EventoEnvioDespachado = EventoAplicacion<
 
 type EventoEnvioUbicacionActualizada = EventoAplicacion<
   "EnvioUbicacionActualizada",
-  { fyhUbicacion: Date; ubicacion: Point; fyhEstimadaEntrega: Date; distanciaADestino: number }
+  {
+    fyhUbicacion: Date;
+    ubicacionActual: Point;
+    fyhEstimadaEntrega: Date;
+    distanciaADestino: number;
+  }
 >;
 
 type EventoEnvioEntregado = EventoAplicacion<"EnvioEntregado", { fyhEntrega: Date }>;
@@ -50,11 +55,26 @@ export const evolucionarEnvio = evolucionarAgregado<Envio, EventoEnvio>((envio, 
         ...evento.contenido,
         estado: "ENTREGADO",
       };
-    case "EnvioUbicacionActualizada":
+    case "EnvioUbicacionActualizada": {
+      const envioEnCamino = envio as Envio & { estado: typeof ESTADOS_ENVIO.EN_CAMINO };
       return {
-        ...(envio as Envio & { estado: typeof ESTADOS_ENVIO.EN_CAMINO }),
+        ...envioEnCamino,
         ...evento.contenido,
+        recorrido: {
+          type: "FeatureCollection",
+          features: envioEnCamino.recorrido.features.concat([
+            {
+              type: "Feature",
+              geometry: evento.contenido.ubicacionActual,
+              properties: {
+                fyhUbicacion: evento.contenido.fyhUbicacion,
+              },
+            },
+          ]),
+        },
       };
+    }
+
     default:
       // Dado que es un Error (y no un custom error) no se le dará esta respuesta al cliente
       throw new Error(
