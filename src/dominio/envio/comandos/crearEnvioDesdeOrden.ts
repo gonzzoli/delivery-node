@@ -36,7 +36,7 @@ export const crearEnvioDesdeOrden = async ({ message: orden }: OrderPlacedData) 
     nombreEvento: "EnvioCreado",
     agregadoId: nuevoEnvioId.toHexString(),
     fyhEvento: new Date(),
-    secuenciaEvento: 1,
+    secuenciaEvento: 1, // Siempre sera el primer evento
     contenido: {
       fyhAlta: new Date(),
       estado: "PENDIENTE DE DESPACHO",
@@ -45,18 +45,18 @@ export const crearEnvioDesdeOrden = async ({ message: orden }: OrderPlacedData) 
       destino: orden.destinationAddress,
       costo: envioCalculado.precioTotal,
       duracionEstimadaViajeMins: envioCalculado.duracionEstimadaMins,
-      distanciaTotal: envioCalculado.distancia,
+      distanciaTotalKm: envioCalculado.distanciaKm,
       ordenId: orden.orderId,
       usuarioCompradorId: orden.userId,
       especificacion: envioCalculado.detallePorArticulo.map((art) => ({
         articuloId: art.articuloId,
         cantidad: art.cantidad,
-        pesoTotalArticulos: art.pesoTotalArticulos,
+        pesoTotalArticulosKg: art.pesoTotalArticulosKg,
         precioCalculadoArticulos: art.precioCalculadoArticulos,
         nombre: art.nombre,
-        ancho: art.ancho,
-        largo: art.largo,
-        peso: art.peso,
+        anchoM: art.anchoM,
+        largoM: art.largoM,
+        pesoKg: art.pesoKg,
       })),
     },
   };

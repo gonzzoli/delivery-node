@@ -5,7 +5,7 @@ import {
   ErrorRecursoNoEncontrado,
 } from "../../../errores/clasesErrores";
 import { ESTADOS_ENVIO } from "../schema";
-import { EventoEnvio, evolucionarEnvio } from "../eventos";
+import { EventoEnvio, evolucionarEnvio, obtenerUltimoEventoEnvio } from "../eventos";
 import dayjs from "dayjs";
 import { emitirEnvioDespachado } from "../rabbit/emitir";
 
@@ -22,16 +22,18 @@ export const despacharEnvio = async (envioId: string) => {
         ". Solo puedes despachar un envío que se encuentra pendiente de despacho."
     );
 
+  const ultimoEvento = await obtenerUltimoEventoEnvio(envio._id.toHexString());
+
   const eventoEnvioDespachado: EventoEnvio & {
     nombreEvento: "EnvioDespachado";
   } = {
     agregadoId: envio._id.toHexString(),
     fyhEvento: new Date(),
-    secuenciaEvento: 0,
+    secuenciaEvento: ultimoEvento.secuenciaEvento + 1,
     nombreEvento: "EnvioDespachado",
     contenido: {
       codigoEntrega: Math.random().toString().slice(2, 7),
-      distanciaADestino: envio.distanciaTotal,
+      distanciaADestinoKm: envio.distanciaTotalKm,
       fyhDespacho: new Date(),
       fyhEstimadaEntrega: dayjs().add(envio.duracionEstimadaViajeMins, "minutes").toDate(),
       ubicacionActual: envio.origen,

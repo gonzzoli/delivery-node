@@ -1,18 +1,18 @@
 import { Envio } from "../../dominio/envio/schema";
 
 export type ResCalcularEnvio = {
-  distancia: number;
+  distanciaKm: number;
   duracionEstimadaMins: number;
   precioTotalEnvio: number;
-  pesoTotalEnvio: number;
+  pesoTotalEnvioKg: number;
   preciosPorArticulo: {
     articuloId: string;
     cantidad: number;
-    peso: number;
-    largo: number;
-    ancho: number;
+    pesoKg: number;
+    largoM: number;
+    anchoM: number;
     nombre: string;
-    pesoTotalArticulos: number;
+    pesoTotalArticulosKg: number;
     precioCalculadoArticulos: number;
   }[];
 };

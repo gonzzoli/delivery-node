@@ -45,10 +45,11 @@ export const manejadorErrores = (
   // Por si se largo algo que realmente no era un error. Rarisimo el caso, pero bueno mejor que no se caiga la app
   if (error instanceof Error) {
     res.status(400).send({
-      titulo: "Ocurrio un error indefinido. Comuniquese con el soporte tecnico. ???",
-      detalle: "Telefono: 0800 llame ya",
+      titulo: "Error no capturado.",
+      detalle: "Ocurrio un error indefinido. Comuniquese con el soporte tecnico.",
       codigoError: 0,
       nombreError: error.name,
+      mensajeError: error.message,
       endpoint: `${req.method} ${req.url}`,
     });
     return;

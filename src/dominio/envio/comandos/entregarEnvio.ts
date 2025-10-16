@@ -6,7 +6,7 @@ import {
   ErrorRecursoNoEncontrado,
 } from "../../../errores/clasesErrores";
 import { ESTADOS_ENVIO } from "../schema";
-import { EventoEnvio, evolucionarEnvio } from "../eventos";
+import { EventoEnvio, evolucionarEnvio, obtenerUltimoEventoEnvio } from "../eventos";
 
 export const entregarEnvio = async (envioId: string, codigoEntrega: string) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -24,12 +24,14 @@ export const entregarEnvio = async (envioId: string, codigoEntrega: string) => {
   if (envio.codigoEntrega !== codigoEntrega)
     throw new ErrorRecursoAjeno("El codigo de entrega del envío no coincide con el proporcionado");
 
+  const ultimoEvento = await obtenerUltimoEventoEnvio(envio._id.toHexString());
+
   const eventoEnvioEntregado: EventoEnvio & {
     nombreEvento: "EnvioEntregado";
   } = {
     agregadoId: envio._id.toHexString(),
     fyhEvento: new Date(),
-    secuenciaEvento: 0,
+    secuenciaEvento: ultimoEvento.secuenciaEvento + 1,
     nombreEvento: "EnvioEntregado",
     contenido: { fyhEntrega: new Date() },
   };
@@ -38,7 +40,7 @@ export const entregarEnvio = async (envioId: string, codigoEntrega: string) => {
   await getColeccion(coleccionesMongo.eventosEnvios).insertOne(eventoEnvioEntregado);
   const envioEntregado = await getColeccion(coleccionesMongo.envios).findOneAndUpdate(
     { _id: envio._id },
-    agregadoEvolucionado,
+    { $set: agregadoEvolucionado },
     { returnDocument: "after" }
   );
   return envioEntregado;

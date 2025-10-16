@@ -1,0 +1,13 @@
+{
+  "correlation_id": "correlation_safdakvljxc",
+  "exchange": "",
+  "routing_key": "",
+  "message": {
+    "orderId": "ace065c9-f45b-4ca5-b7f7-eaab0b669cad",
+    "cartId": "68ec6635efa283f005ddc9b5",
+    "userId": "68ea4e2798dcc2c79e266709",
+    "originAddress": {"type": "Point", "coordinates": [-68.844702, -32.889513]},
+    "destinationAddress": {"type": "Point", "coordinates": [-69.042145, -33.772514]},
+    "articles": [{"articleId":"68f1151587b3318e4f7a17ca","quantity":10}, {"articleId":"68ea4ef111bd1bf713acc203","quantity":3}]
+  }
+}

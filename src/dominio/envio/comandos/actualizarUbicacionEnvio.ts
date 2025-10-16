@@ -5,7 +5,7 @@ import {
   ErrorEntidadAccionInvalida,
   ErrorRecursoNoEncontrado,
 } from "../../../errores/clasesErrores";
-import { EventoEnvio, evolucionarEnvio } from "../eventos";
+import { EventoEnvio, evolucionarEnvio, obtenerUltimoEventoEnvio } from "../eventos";
 import { Point } from "geojson";
 import * as turf from "@turf/turf";
 import { calcularDuracionEstimadaViajeMins } from "../queries/calcularEnvio";
@@ -25,21 +25,24 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
         ". Solo puedes actualizar la ubicación de un envio que se encuentra en camino."
     );
 
-  const distanciaADestino = turf.distance(nuevaUbicacion, envio.destino);
+  const distanciaADestinoKm = turf.distance(nuevaUbicacion, envio.destino);
+
+  // Buscamos el ultimo evento generado para obtener la secuencia correcta
+  const ultimoEvento = await obtenerUltimoEventoEnvio(envio._id.toHexString());
 
   const eventoUbicacionActualizada: EventoEnvio & {
     nombreEvento: "EnvioUbicacionActualizada";
   } = {
     agregadoId: envio._id.toHexString(),
     fyhEvento: new Date(),
-    secuenciaEvento: 0,
+    secuenciaEvento: ultimoEvento.secuenciaEvento + 1,
     nombreEvento: "EnvioUbicacionActualizada",
     contenido: {
       fyhUbicacion: new Date(),
       ubicacionActual: nuevaUbicacion,
-      distanciaADestino,
+      distanciaADestinoKm,
       fyhEstimadaEntrega: dayjs()
-        .add(calcularDuracionEstimadaViajeMins(distanciaADestino), "days")
+        .add(calcularDuracionEstimadaViajeMins(distanciaADestinoKm), "days")
         .toDate(),
     },
   };
@@ -52,11 +55,11 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
     { returnDocument: "after" }
   );
   // Regla de negocio, posiblemente para un servicio de notificaciones
-  if (distanciaADestino <= 100)
+  if (distanciaADestinoKm <= 100)
     void emitirEnvioCercanoADestino({
       envioId: envio._id.toHexString(),
-      distanciaRestanteKm: distanciaADestino,
-      tiempoRestanteAproximadoMin: calcularDuracionEstimadaViajeMins(distanciaADestino),
+      distanciaRestanteKm: distanciaADestinoKm,
+      tiempoRestanteAproximadoMin: calcularDuracionEstimadaViajeMins(distanciaADestinoKm),
     });
   return envioActualizado;
 };

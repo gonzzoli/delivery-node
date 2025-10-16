@@ -22,7 +22,7 @@ export const modificarArticulo = async (req: Request, res: Response) => {
       {
         _id: articuloExistente._id,
       },
-      { $set: { peso: dto.peso, largo: dto.largo, ancho: dto.ancho } },
+      { $set: { pesoKg: dto.pesoKg, largoM: dto.largoM, anchoM: dto.anchoM } },
       { returnDocument: "after" }
     ))!;
 
@@ -53,9 +53,9 @@ const buscarYGuardarArticuloCatalog = async (dto: ModificarArticuloDTO, tokenJWT
   const { insertedId } = await getColeccion(coleccionesMongo.articulos).insertOne({
     _id: new ObjectId(articuloCatalog._id),
     nombre: articuloCatalog.name,
-    peso: dto.peso,
-    largo: dto.largo,
-    ancho: dto.ancho,
+    pesoKg: dto.pesoKg,
+    largoM: dto.largoM,
+    anchoM: dto.anchoM,
   });
 
   const articuloInsertado = await getColeccion(coleccionesMongo.articulos).findOne({

@@ -1,6 +1,8 @@
 import { Point } from "geojson";
 import { EventoAplicacion, evolucionarAgregado } from "../../utils/eventos";
 import { Envio, ESTADOS_ENVIO, RecorridoRealizadoEnvio } from "./schema";
+import { coleccionesMongo, getColeccion } from "../../config/bd";
+import { ErrorRecursoNoEncontrado } from "../../errores/clasesErrores";
 
 type EventoEnvioCreado = EventoAplicacion<
   "EnvioCreado",
@@ -15,7 +17,7 @@ type EventoEnvioDespachado = EventoAplicacion<
     ubicacionActual: Point;
     codigoEntrega: string;
     recorrido: RecorridoRealizadoEnvio;
-    distanciaADestino: number;
+    distanciaADestinoKm: number;
   }
 >;
 
@@ -25,7 +27,7 @@ type EventoEnvioUbicacionActualizada = EventoAplicacion<
     fyhUbicacion: Date;
     ubicacionActual: Point;
     fyhEstimadaEntrega: Date;
-    distanciaADestino: number;
+    distanciaADestinoKm: number;
   }
 >;
 
@@ -82,3 +84,21 @@ export const evolucionarEnvio = evolucionarAgregado<Envio, EventoEnvio>((envio, 
       );
   }
 });
+
+/** Busca el ultimo evento del envio con el id pasado por parametro y lo devuelve.
+ * Si no encuentra ningun evento devuelve null (deberia siempre encontrar al menos el de creacion)
+ */
+export const obtenerUltimoEventoEnvio = async (envioId: string) => {
+  const ultimoEvento = await getColeccion(coleccionesMongo.eventosEnvios)
+    .find({
+      agregadoId: envioId,
+    })
+    .sort({ secuenciaEvento: -1 })
+    .limit(1)
+    .next();
+  if (!ultimoEvento)
+    throw new ErrorRecursoNoEncontrado(
+      "No se han encontrado eventos para el envio de id " + envioId
+    );
+  return ultimoEvento;
+};

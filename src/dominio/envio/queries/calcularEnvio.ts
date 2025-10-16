@@ -37,7 +37,8 @@ export const calcularEnvio = async (especificacionEnvio: CalcularEnvioParams) =>
 
   if (articulosNoEncontradosIds.length > 0)
     throw new ErrorRecursoNoEncontrado(
-      "No se encontraron articulos con los siguientes ids: " + articulosNoEncontradosIds.join(", ")
+      "No se encontraron las dimensiones de los articulos con los siguientes ids: " +
+        articulosNoEncontradosIds.join(", ")
     );
 
   const [precioPorKm, precioPorM2, precioPorKg, provinciaOrigen, provinciaDestino] =
@@ -75,16 +76,16 @@ export const calcularEnvio = async (especificacionEnvio: CalcularEnvioParams) =>
     // Formula no muy convincente, pero solo para que interactuen las distintas variables del articulo y el envio
     const precioPorUnidad =
       distanciaOrigenDestinoKm * precioPorKm!.valor +
-      articuloBD.peso * precioPorKg!.valor +
-      articuloBD.ancho * articuloBD.largo * precioPorM2!.valor;
+      articuloBD.pesoKg * precioPorKg!.valor +
+      articuloBD.anchoM * articuloBD.largoM * precioPorM2!.valor;
     return {
       articuloId: articuloBD._id.toHexString(),
       nombre: articuloBD.nombre,
       cantidad: articuloPedido.cantidad,
-      peso: articuloBD.peso,
-      largo: articuloBD.largo,
-      ancho: articuloBD.ancho,
-      pesoTotalArticulos: articuloBD.peso * articuloPedido.cantidad,
+      pesoKg: articuloBD.pesoKg,
+      largoM: articuloBD.largoM,
+      anchoM: articuloBD.anchoM,
+      pesoTotalArticulosKg: articuloBD.pesoKg * articuloPedido.cantidad,
       // Solo la primera unidad se cobra completa, el resto al 50% para simular descuento de por mayor
       precioCalculadoArticulos:
         precioPorUnidad + (articuloPedido.cantidad - 1) * precioPorUnidad * 0.5,
@@ -92,10 +93,10 @@ export const calcularEnvio = async (especificacionEnvio: CalcularEnvioParams) =>
   });
 
   return {
-    distancia: distanciaOrigenDestinoKm,
+    distanciaKm: distanciaOrigenDestinoKm,
     duracionEstimadaMins: calcularDuracionEstimadaViajeMins(distanciaOrigenDestinoKm),
-    pesoTotalEnvio: detallePorArticulo.reduce(
-      (pesoResultante, articulo) => pesoResultante + articulo.pesoTotalArticulos,
+    pesoTotalEnvioKg: detallePorArticulo.reduce(
+      (pesoResultante, articulo) => pesoResultante + articulo.pesoTotalArticulosKg,
       0
     ),
     precioTotal:

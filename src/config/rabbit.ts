@@ -46,10 +46,15 @@ export const fabricaEmitirMensajeExchangeRabbit =
     routingKey: string
   ) =>
   async (mensaje: T) => {
+    console.log("EMITIENDO", exchange, tipoExchange, routingKey, JSON.stringify(mensaje));
     const conexion = await conectarRabbit();
+    console.log(1)
     const canal = await conexion.createChannel();
+    console.log(2)
     await canal.assertExchange(exchange, tipoExchange);
-    canal.publish(DELIVERY_EXCHANGE, routingKey, Buffer.from(JSON.stringify(mensaje)));
+    console.log(3)
+    canal.publish(exchange, routingKey, Buffer.from(JSON.stringify(mensaje)));
+    console.log(4)
   };
 
 /**

@@ -19,9 +19,9 @@ export type Provincia = {
 
 export type Articulo = {
   nombre: string;
-  peso: number;
-  largo: number;
-  ancho: number;
+  pesoKg: number;
+  largoM: number;
+  anchoM: number;
 };
 
 // Entidades
@@ -42,9 +42,9 @@ export type Envio = {
   ordenId: OrdenId;
   usuarioCompradorId: string;
   origen: Point; // Indicado en el mensaje de order_placed
-  destino: Point; // Extraido del usuario comprador
+  destino: Point; // idealmente extraido del usuario comprador, pero como no lo tiene lo sacamos del order tamb
   duracionEstimadaViajeMins: number;
-  distanciaTotal: number;
+  distanciaTotalKm: number;
   fyhAlta: Date;
   costo: number;
   especificacion: EspecificacionArticuloEnvio[];
@@ -56,7 +56,7 @@ export type Envio = {
       estado: typeof ESTADOS_ENVIO.EN_CAMINO;
       codigoEntrega: string;
       fyhEstimadaEntrega: Date;
-      distanciaADestino: number;
+      distanciaADestinoKm: number;
       fyhDespacho: Date;
       ubicacionActual: Point;
       recorrido: RecorridoRealizadoEnvio;
