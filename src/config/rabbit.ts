@@ -51,25 +51,20 @@ export const fabricaEmitirMensajeExchangeRabbit =
   <T>(
     exchange: string,
     tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
-    routingKey: string,
-    correlation_id?: string
+    routingKey: string
   ) =>
-  async (mensaje: T) => {
-    console.log("EMITIENDO", exchange, tipoExchange, routingKey, JSON.stringify(mensaje));
+  async (mensaje: T, correlation_id?: string) => {
     const conexion = await conectarRabbit();
-    console.log(1);
     const canal = await conexion.createChannel();
-    console.log(2);
     await canal.assertExchange(exchange, tipoExchange);
-    console.log(3);
     const mensajeEstandarizado: MensajeRabbit<T> = {
       correlation_id: correlation_id ?? "",
       exhange: exchange,
       routing_key: routingKey,
       message: mensaje,
     };
+    logger.info(mensajeEstandarizado, "Mensaje emitido a Rabbit");
     canal.publish(exchange, routingKey, Buffer.from(JSON.stringify(mensajeEstandarizado)));
-    console.log(4);
   };
 
 /**
@@ -97,7 +92,9 @@ export const fabricaConsumirMensajeExchangeRabbit = async <T>(
       if (mensaje) {
         try {
           console.log("MENSAJE RECIBIDO json: ", JSON.parse(mensaje.content.toString()));
-          await callback(JSON.parse(mensaje.content.toString()) as MensajeRabbit<T>);
+          const mensajeJSON = JSON.parse(mensaje.content.toString()) as MensajeRabbit<T>;
+          logger.info({ exchange, queue, routingKey, mensajeJSON }, "Mensaje recibido de rabbit");
+          await callback(mensajeJSON);
           canal.ack(mensaje);
         } catch (error) {
           if (error instanceof SyntaxError)

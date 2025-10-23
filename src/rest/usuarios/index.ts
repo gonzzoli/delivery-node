@@ -21,7 +21,7 @@ export type ActualizarUsuarioDTO = ExtraerRestDTO<typeof schemaActualizarUsuario
 // Solo actualiza la direccion del usuario.
 const actualizarUsuario = async (req: Request, res: Response) => {
   const dto = req.datosValidados as ActualizarUsuarioDTO;
-  if (req.usuario!.permisos.includes("admin") && dto.usuarioId !== req.usuario!._id.toString())
+  if (req.usuario!.permisos.includes("admin") && dto.usuarioId !== req.usuario!._id.toHexString())
     throw new ErrorAutorizacion();
   const usuarioActualizado = await ComandosUsuario.actualizarUsuario({
     usuarioId: dto.usuarioId,

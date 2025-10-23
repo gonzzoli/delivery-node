@@ -14,7 +14,7 @@ export const buscarEnvio = async (req: Request, res: Response) => {
   // Verificamos que sea el usuario que compra o que sea admin
   if (
     !req.usuario!.permisos.includes("admin") &&
-    req.usuario!._id.toString() !== envio?.usuarioCompradorId
+    req.usuario!._id.toHexString() !== envio?.usuarioCompradorId
   )
     envio = null;
 

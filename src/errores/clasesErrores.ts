@@ -27,7 +27,6 @@ export class ErrorAplicacion extends Error {
     descripcion: string,
     codigoIdentificacion: number
   ) {
-    console.log("ERROR DESCRIP", descripcion);
     super(descripcion);
     Object.setPrototypeOf(this, new.target.prototype);
 

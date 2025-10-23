@@ -16,7 +16,10 @@ export type OrderPlacedData = {
   articles: { articleId: string; quantity: number }[];
 };
 
-export const crearEnvioDesdeOrden = async ({ message: orden }: MensajeRabbit<OrderPlacedData>) => {
+export const crearEnvioDesdeOrden = async ({
+  message: orden,
+  correlation_id,
+}: MensajeRabbit<OrderPlacedData>) => {
   console.log("ORDEN PUESTA", orden);
   const envioCalculado = await QueriesEnvio.calcularEnvio({
     origenEnvio: orden.originAddress,
@@ -66,5 +69,5 @@ export const crearEnvioDesdeOrden = async ({ message: orden }: MensajeRabbit<Ord
   });
 
   // y emitimos el evento
-  void emitirEnvioCreado(eventoEnvioCreado.contenido);
+  void emitirEnvioCreado(eventoEnvioCreado.contenido, correlation_id);
 };

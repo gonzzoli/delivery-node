@@ -11,6 +11,7 @@ import * as turf from "@turf/turf";
 import { calcularDuracionEstimadaViajeMins } from "../queries/calcularEnvio";
 import dayjs from "dayjs";
 import { emitirEnvioCercanoADestino } from "../rabbit/emitir";
+import generarCorrelationId from "../../../utils/generarCorrelationId";
 
 export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: Point) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -56,10 +57,13 @@ export const actualizarUbicacionEnvio = async (envioId: string, nuevaUbicacion: 
   );
   // Regla de negocio, posiblemente para un servicio de notificaciones
   if (distanciaADestinoKm <= 100)
-    void emitirEnvioCercanoADestino({
-      envioId: envio._id.toHexString(),
-      distanciaRestanteKm: distanciaADestinoKm,
-      tiempoRestanteAproximadoMin: calcularDuracionEstimadaViajeMins(distanciaADestinoKm),
-    });
+    void emitirEnvioCercanoADestino(
+      {
+        envioId: envio._id.toHexString(),
+        distanciaRestanteKm: distanciaADestinoKm,
+        tiempoRestanteAproximadoMin: calcularDuracionEstimadaViajeMins(distanciaADestinoKm),
+      },
+      generarCorrelationId()
+    );
   return envioActualizado;
 };

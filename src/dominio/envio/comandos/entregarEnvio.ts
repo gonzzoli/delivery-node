@@ -7,6 +7,8 @@ import {
 } from "../../../errores/clasesErrores";
 import { ESTADOS_ENVIO } from "../schema";
 import { EventoEnvio, evolucionarEnvio, obtenerUltimoEventoEnvio } from "../eventos";
+import { emitirEnvioEntregado } from "../rabbit/emitir";
+import generarCorrelationId from "../../../utils/generarCorrelationId";
 
 export const entregarEnvio = async (envioId: string, codigoEntrega: string) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -42,6 +44,10 @@ export const entregarEnvio = async (envioId: string, codigoEntrega: string) => {
     { _id: envio._id },
     { $set: agregadoEvolucionado },
     { returnDocument: "after" }
+  );
+  void emitirEnvioEntregado(
+    { envioId: envio._id.toHexString(), fyhEntrega: new Date() },
+    generarCorrelationId()
   );
   return envioEntregado;
 };

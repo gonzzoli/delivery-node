@@ -8,6 +8,7 @@ import { ESTADOS_ENVIO } from "../schema";
 import { EventoEnvio, evolucionarEnvio, obtenerUltimoEventoEnvio } from "../eventos";
 import dayjs from "dayjs";
 import { emitirEnvioDespachado } from "../rabbit/emitir";
+import generarCorrelationId from "../../../utils/generarCorrelationId";
 
 export const despacharEnvio = async (envioId: string) => {
   const envio = await getColeccion(coleccionesMongo.envios).findOne({
@@ -59,6 +60,6 @@ export const despacharEnvio = async (envioId: string) => {
     { $set: agregadoEvolucionado },
     { returnDocument: "after" }
   )!;
-  void emitirEnvioDespachado({ envioId: envio._id.toHexString() });
+  void emitirEnvioDespachado({ envioId: envio._id.toHexString() }, generarCorrelationId());
   return envioDespachado;
 };

@@ -2,9 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import { ErrorAutenticacion, ErrorAutorizacion } from "../errores/clasesErrores";
 import { decode } from "jsonwebtoken";
 import { coleccionesMongo, getColeccion } from "../config/bd";
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 import ComandosUsuario from "../dominio/usuario/comandos";
-import axios from "axios";
+import { Usuario } from "../dominio/usuario/schema";
+import { AxiosError } from "axios";
+import { CodigosHTTP } from "../utils/codigosHTTP";
 
 export type PayloadToken = { tokenID: string; userID: string };
 
@@ -27,46 +29,42 @@ export const validarUsuario =
         getColeccion(coleccionesMongo.usuarios).findOne({ _id: new ObjectId(userID) }),
         getColeccion(coleccionesMongo.tokens).findOne({ _id: new ObjectId(tokenID) }),
       ]);
-      // Si no existia, al intentar actualizarlo ya se esta validando que el token sea valido tambien.
-      // mediante la peticion a auth.
-      if (!usuarioLocal || !usuarioLocal.enabled) {
-        const usuarioCreadoActualizado = await ComandosUsuario.registrarActualizarUsuario(tokenJWT);
-        // Si sigue estando disabled despues de actualizarlo, rechazamos
-        if (!usuarioCreadoActualizado.enabled)
-          throw new ErrorAutenticacion("Tu usuario esta deshabilitado");
 
+      let usuarioActualizado: WithId<Usuario> | null = usuarioLocal;
+
+      // Si no esta el token, puede que no este el usuario o debamos actualizar sus permisos/datos
+      if (!tokenLocal) {
+        // Auth lanza err 401, asi que esto valida el token tambien.
+        try {
+          usuarioActualizado = await ComandosUsuario.registrarActualizarUsuario(tokenJWT);
+        } catch (error) {
+          if (error instanceof AxiosError && error.response?.status === CodigosHTTP.UNAUTHORIZED)
+            throw new ErrorAutenticacion("El token no es valido");
+          else throw error;
+        }
         await getColeccion(coleccionesMongo.tokens).insertOne({
           _id: new ObjectId(tokenID),
-          usuarioId: usuarioCreadoActualizado._id,
+          usuarioId: new ObjectId(userID),
           enabled: true,
         });
-        return;
+        validarEstadoYPermisosUsuario(usuarioActualizado, permisoRequerido);
+      } else {
+        // Si esta el tokenLocal, asumo que tambien ya hemos guardado al usuario localmente
+        // Solo para dejar explicito que asumo que esta el usuario
+        usuarioActualizado = usuarioActualizado!;
+        if (!tokenLocal.enabled) throw new ErrorAutenticacion("El token ya no es valido");
+        validarEstadoYPermisosUsuario(usuarioActualizado, permisoRequerido);
       }
 
-      req.usuario = usuarioLocal;
-
-      // El usuario ya esta seguro en la bd local y enabled. Verificamos sus permisos ahora
-      if (permisoRequerido && !usuarioLocal.permisos.includes(permisoRequerido))
-        throw new ErrorAutorizacion();
-
-      if (tokenLocal)
-        if (!tokenLocal.enabled) throw new ErrorAutenticacion("El token ya no es valido");
-        else return next();
-
-      // No tenemos el tokenLocal, debemos probar que sea valido y luego almacenarlo o no.
-      // Auth lanza err 401, asi que esto valida el token.
-      await axios.get(`${process.env.AUTH_API_BASE_URL}/users/current`, {
-        headers: { Authorization: `Bearer ${tokenJWT}` },
-      });
-
-      await getColeccion(coleccionesMongo.tokens).insertOne({
-        _id: new ObjectId(tokenID),
-        usuarioId: new ObjectId(userID),
-        enabled: true,
-      });
-
+      req.usuario = usuarioActualizado;
       next();
     } catch (error) {
       next(error);
     }
   };
+
+const validarEstadoYPermisosUsuario = (usuario: Usuario, permisoRequerido?: "admin" | "user") => {
+  if (!usuario.enabled) throw new ErrorAutenticacion("Tu usuario esta deshabilitado");
+  else if (permisoRequerido && !usuario.permisos.includes(permisoRequerido))
+    throw new ErrorAutorizacion("No tienes permiso para realizar esta accion");
+};

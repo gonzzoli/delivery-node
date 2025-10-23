@@ -31,9 +31,6 @@ export const registrarActualizarUsuario = async (tokenJWT: string) => {
 
   const usuarioAuth = reqUsuarioAuth.data;
 
-  console.log("USUARIO EXISTENTE", usuarioLocal);
-  console.log("ULTIMOS DATOS", usuarioAuth);
-
   // Si no se encontro en auth que es el que centraliza los usuarios, decimos que no se encontro
   // ya que no podria crearse ni actualizarse en este microservicio
   if (!usuarioAuth)
@@ -51,15 +48,12 @@ export const registrarActualizarUsuario = async (tokenJWT: string) => {
   };
 
   if (!usuarioLocal) {
-    console.log("INSERTANDO", datosUsuarioActualizado);
     await getColeccion(coleccionesMongo.usuarios).insertOne(datosUsuarioActualizado);
     const usuarioCreado = (await getColeccion(coleccionesMongo.usuarios).findOne({
       _id: new ObjectId(userID),
     }))!;
-    console.log("INSERTADO");
     return usuarioCreado;
   } else {
-    console.log("ACTUALIZANDO", datosUsuarioActualizado);
     return (await getColeccion(coleccionesMongo.usuarios).findOneAndUpdate(
       { _id: new ObjectId(userID) },
       { $set: datosUsuarioActualizado },

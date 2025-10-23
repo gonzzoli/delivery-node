@@ -1,13 +1,19 @@
 {
-  "correlation_id": "correlation_safdakvljxc",
+  "correlation_id": "correlation_safdakvljxc1564",
   "exchange": "",
   "routing_key": "",
   "message": {
-    "orderId": "ace065c9-f45b-4ca5-b7f7-eaab0b669cad",
-    "cartId": "68ec6635efa283f005ddc9b5",
+    "orderId": "35096c37-dafb-432c-ab83-ed026cb493db",
+    "cartId": "68f1156e5efe855ee43c86c8",
     "userId": "68ea4e2798dcc2c79e266709",
-    "originAddress": {"type": "Point", "coordinates": [-68.844702, -32.889513]},
-    "destinationAddress": {"type": "Point", "coordinates": [-69.042145, -33.772514]},
-    "articles": [{"articleId":"68f1151587b3318e4f7a17ca","quantity":10}, {"articleId":"68ea4ef111bd1bf713acc203","quantity":3}]
+    "originAddress": {"type": "Point", "coordinates": [
+            -69.040610,
+            -33.771820
+        ]},
+    "destinationAddress": {"type": "Point", "coordinates": [
+            -68.844458,
+            -32.889933
+        ]},
+    "articles": [{"articleId":"68f1151587b3318e4f7a17ca","quantity":10}, {"articleId":"68ea4ef111bd1bf713acc203","quantity":20}]
   }
 }
