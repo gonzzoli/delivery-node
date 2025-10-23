@@ -3,13 +3,14 @@ import { logger } from "../utils/logger";
 import { ErrorConexionBD } from "../errores/clasesErrores";
 import type { Articulo, Envio, Parametro, Provincia } from "../dominio/envio/schema";
 import type { EventoEnvio } from "../dominio/envio/eventos";
-import type { Usuario } from "../dominio/usuario/schema";
+import type { Usuario, Token } from "../dominio/usuario/schema";
 
 type ColeccionesBD = {
   envios?: Collection<Envio>;
   eventosEnvios?: Collection<EventoEnvio>;
   articulos?: Collection<Articulo>;
   usuarios?: Collection<Usuario>;
+  tokens?: Collection<Token>;
   provincias?: Collection<Provincia>;
   parametros?: Collection<Parametro>;
 };
@@ -29,6 +30,7 @@ export async function conectarBD() {
     coleccionesMongo.envios = db.collection("envios");
     coleccionesMongo.eventosEnvios = db.collection("eventosEnvios");
     coleccionesMongo.usuarios = db.collection("usuarios");
+    coleccionesMongo.tokens = db.collection("tokens");
     coleccionesMongo.articulos = db.collection("articulos");
     coleccionesMongo.provincias = db.collection("provincias");
     coleccionesMongo.parametros = db.collection("parametros");

@@ -36,6 +36,14 @@ export const TIPOS_EXCHANGE = {
 } as const;
 export const DELIVERY_EXCHANGE = "exchange_delivery";
 
+/** Tipo compartido que todos los mensajes de rabbit respetan */
+export type MensajeRabbit<T> = {
+  correlation_id: string;
+  exhange: string;
+  routing_key: string;
+  message: T;
+};
+
 /**
  * Se encarga de conectar con rabbit, assert el exchange, y enviar el mensaje a donde se le indique por parametro.
  */
@@ -43,18 +51,25 @@ export const fabricaEmitirMensajeExchangeRabbit =
   <T>(
     exchange: string,
     tipoExchange: (typeof TIPOS_EXCHANGE)[keyof typeof TIPOS_EXCHANGE],
-    routingKey: string
+    routingKey: string,
+    correlation_id?: string
   ) =>
   async (mensaje: T) => {
     console.log("EMITIENDO", exchange, tipoExchange, routingKey, JSON.stringify(mensaje));
     const conexion = await conectarRabbit();
-    console.log(1)
+    console.log(1);
     const canal = await conexion.createChannel();
-    console.log(2)
+    console.log(2);
     await canal.assertExchange(exchange, tipoExchange);
-    console.log(3)
-    canal.publish(exchange, routingKey, Buffer.from(JSON.stringify(mensaje)));
-    console.log(4)
+    console.log(3);
+    const mensajeEstandarizado: MensajeRabbit<T> = {
+      correlation_id: correlation_id ?? "",
+      exhange: exchange,
+      routing_key: routingKey,
+      message: mensaje,
+    };
+    canal.publish(exchange, routingKey, Buffer.from(JSON.stringify(mensajeEstandarizado)));
+    console.log(4);
   };
 
 /**
@@ -67,7 +82,7 @@ export const fabricaConsumirMensajeExchangeRabbit = async <T>(
   nombreQueue = "",
   routingKey: string,
   opcionesExchange: amqp.Options.AssertExchange,
-  callback: (mensaje: T) => Promise<void>
+  callback: (mensaje: MensajeRabbit<T>) => Promise<void> | void
 ) => {
   const conexion = await conectarRabbit();
   const canal = await conexion.createChannel();
@@ -82,7 +97,7 @@ export const fabricaConsumirMensajeExchangeRabbit = async <T>(
       if (mensaje) {
         try {
           console.log("MENSAJE RECIBIDO json: ", JSON.parse(mensaje.content.toString()));
-          await callback(JSON.parse(mensaje.content.toString()) as T);
+          await callback(JSON.parse(mensaje.content.toString()) as MensajeRabbit<T>);
           canal.ack(mensaje);
         } catch (error) {
           if (error instanceof SyntaxError)

@@ -1,15 +1,18 @@
 import { fabricaConsumirMensajeExchangeRabbit, TIPOS_EXCHANGE } from "../../../config/rabbit";
-import { registrarUsuario } from "../comandos/registrarUsuario";
+import ComandosUsuario from "../comandos";
 
-// Esto no lo emite realmente auth, asi que debe simularse desde el panel de rabbit. Solo envia
-// usuarioId porque la ubicacion es algo que maneja este microservicio. Recibe el userID
-void fabricaConsumirMensajeExchangeRabbit<{ userId: string }>(
-  "user_registered",
+/** No tiene ningun routing key que sea de deslogeo o algo
+ * este mensaje de auth, y solo envia el token, pero bueno
+ * solo sucede al deslogearse asi que lo asumimos como deslogeo.
+ */
+void fabricaConsumirMensajeExchangeRabbit<string>(
+  "auth",
   TIPOS_EXCHANGE.FANOUT,
-  "delivery_user_registered",
+  "delivery_user_logout",
   "",
-  { durable: true },
+  { durable: false },
   async (mensaje) => {
-    await registrarUsuario(mensaje.userId);
+    const token = mensaje.message.split(" ")[1];
+    await ComandosUsuario.invalidarToken(token);
   }
 );

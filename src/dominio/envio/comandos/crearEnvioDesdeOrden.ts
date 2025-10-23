@@ -5,22 +5,18 @@ import QueriesEnvio from "../queries";
 import { CarritoId, OrdenId } from "../schema";
 import { Point } from "geojson";
 import { emitirEnvioCreado } from "../rabbit/emitir";
+import { MensajeRabbit } from "../../../config/rabbit";
 
 export type OrderPlacedData = {
-  correlation_id: string;
-  exchange: string;
-  routing_key: string;
-  message: {
-    orderId: OrdenId;
-    cartId: CarritoId;
-    userId: string;
-    originAddress: Point;
-    destinationAddress: Point;
-    articles: { articleId: string; quantity: number }[];
-  };
+  orderId: OrdenId;
+  cartId: CarritoId;
+  userId: string;
+  originAddress: Point;
+  destinationAddress: Point;
+  articles: { articleId: string; quantity: number }[];
 };
 
-export const crearEnvioDesdeOrden = async ({ message: orden }: OrderPlacedData) => {
+export const crearEnvioDesdeOrden = async ({ message: orden }: MensajeRabbit<OrderPlacedData>) => {
   console.log("ORDEN PUESTA", orden);
   const envioCalculado = await QueriesEnvio.calcularEnvio({
     origenEnvio: orden.originAddress,

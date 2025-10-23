@@ -4,9 +4,9 @@ import { validarRequest } from "../../middlewares/validarRequest";
 import z from "zod";
 import { ExtraerRestDTO, schemaPuntoGeoJSONDTO, stringZod } from "../../utils/zodUtils";
 import ComandosUsuario from "../../dominio/usuario/comandos";
-import { validarUsuario } from "../../middlewares/validarUsuario";
 import { ErrorAutorizacion } from "../../errores/clasesErrores";
 import { CodigosHTTP } from "../../utils/codigosHTTP";
+import { validarUsuario } from "../../middlewares/validarUsuario";
 
 const router = Router();
 
@@ -21,7 +21,8 @@ export type ActualizarUsuarioDTO = ExtraerRestDTO<typeof schemaActualizarUsuario
 // Solo actualiza la direccion del usuario.
 const actualizarUsuario = async (req: Request, res: Response) => {
   const dto = req.datosValidados as ActualizarUsuarioDTO;
-  if (dto.usuarioId !== req.usuarioId) throw new ErrorAutorizacion();
+  if (req.usuario!.permisos.includes("admin") && dto.usuarioId !== req.usuario!._id.toString())
+    throw new ErrorAutorizacion();
   const usuarioActualizado = await ComandosUsuario.actualizarUsuario({
     usuarioId: dto.usuarioId,
     ubicacion: dto.ubicacion,

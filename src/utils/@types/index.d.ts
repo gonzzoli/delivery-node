@@ -1,8 +1,8 @@
 // con esto podemos agregar el objeto datosValidados al objeto req
 // en nuestras rutas. Ese atributo debe ser siempre asignado en el middleware validarRequest
 
+import { WithId } from "mongodb";
 import { Usuario } from "../../dominio/usuario/schema";
-
 
 // y tendra los datos definidos en el schema Zod pasado como parametro
 declare global {
@@ -13,7 +13,7 @@ declare global {
       datosValidados?: Record<string, unknown>;
 
       // campo agregado al usar middleware validarUsuario
-      usuarioId?: Usuario["usuarioId"];
+      usuario?: WithId<Usuario>;
     }
   }
   namespace NodeJS {
@@ -25,6 +25,7 @@ declare global {
       MONGO_DB_NAME: string;
       RABBIT_URL: string;
       CATALOG_API_BASE_URL: string;
+      AUTH_API_BASE_URL: string;
     }
   }
 }

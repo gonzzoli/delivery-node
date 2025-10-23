@@ -1,9 +1,11 @@
 import { actualizarUsuario } from "./actualizarUsuario";
-import { registrarUsuario } from "./registrarUsuario";
+import { invalidarToken } from "./invalidarToken";
+import { registrarActualizarUsuario } from "./registrarActualizarUsuario";
 
 const ComandosUsuario = {
-  registrarUsuario,
+  registrarActualizarUsuario,
   actualizarUsuario,
+  invalidarToken,
 };
 
 export default ComandosUsuario;

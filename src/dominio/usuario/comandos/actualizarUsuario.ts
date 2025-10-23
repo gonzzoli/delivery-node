@@ -8,6 +8,7 @@ export type ComandoActualizarUsuario = {
   ubicacion: Point;
 };
 
+/** EN DESUSO, solo a modo demostrativo de lo que se penso hacer */
 export const actualizarUsuario = async (comando: ComandoActualizarUsuario) => {
   const provinciaCorrespondiente = await getColeccion(coleccionesMongo.provincias).findOne({
     poligonoLimite: {

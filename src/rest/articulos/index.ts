@@ -2,14 +2,14 @@ import { Router } from "express";
 import { modificarArticulo } from "./controladores/modificarArticulo";
 import { validarRequest } from "../../middlewares/validarRequest";
 import { schemaModificarArticuloDTO } from "./dto";
-import { validarUsuario } from "../../middlewares/validarUsuario";
 import { tryCatchControlador } from "../../errores/tryCatch";
+import { validarUsuario } from "../../middlewares/validarUsuario";
 
 const router = Router();
 
 router.patch(
   "/:articuloId",
-  validarUsuario,
+  validarUsuario("admin"),
   validarRequest(schemaModificarArticuloDTO),
   tryCatchControlador(modificarArticulo)
 );
